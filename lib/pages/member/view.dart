@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:piliotto/common/mixins/scroll_to_top.dart';
@@ -8,6 +7,7 @@ import 'package:piliotto/common/skeleton/video_card_h.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/common/widgets/no_data.dart';
 import 'package:piliotto/common/widgets/page_widgets.dart';
+import 'package:piliotto/common/widgets/user_profile_header.dart';
 import 'package:piliotto/common/widgets/video_card_h.dart';
 import 'package:piliotto/pages/dynamics/widgets/dynamic_panel.dart';
 import 'package:piliotto/pages/fav/index.dart';
@@ -355,190 +355,27 @@ class _MemberPageState extends State<MemberPage>
   }
 
   Widget _buildHeaderWithUserInfo(ThemeData theme) {
-    final isNarrowScreen = MediaQuery.of(context).size.width < 600;
-
     return Obx(() {
-      final cover = _memberController.memberInfo.value.cover;
-      final hasCover = cover != null && cover.isNotEmpty;
-      return Container(
+      return UserProfileHeader(
+        coverUrl: _memberController.memberInfo.value.cover,
+        avatarUrl: _memberController.face.value,
+        userName: _memberController.memberInfo.value.name,
+        userId: mid.toString(),
+        followingCount:
+            _memberController.memberInfo.value.attention?.toString(),
+        followerCount: _memberController.memberInfo.value.fans?.toString(),
+        showActionButtons: !_memberController.isOwner.value,
+        isOwner: _memberController.isOwner.value,
+        onRelationAction: _memberController.actionRelationMod,
+        relationButtonText: _memberController.attributeText.value,
+        onMessageAction: () => Get.toNamed('/message', parameters: {
+          'mid': mid.toString(),
+          'name': _memberController.memberInfo.value.name ?? '',
+          'face': _memberController.face.value,
+        }),
         height: 240,
-        color: theme.colorScheme.secondaryContainer,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (hasCover)
-              CachedNetworkImage(
-                imageUrl: cover.startsWith('//') ? 'https:$cover' : cover,
-                fit: BoxFit.cover,
-                fadeInDuration: const Duration(milliseconds: 300),
-                fadeOutDuration: const Duration(milliseconds: 120),
-                placeholder: (context, url) => const SizedBox.shrink(),
-                errorWidget: (context, url, error) => const SizedBox.shrink(),
-              ),
-            Container(
-              color:
-                  hasCover ? Colors.black.withAlpha(100) : Colors.transparent,
-            ),
-            SafeArea(
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildAvatar(theme, hasCover),
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildUserDetails(theme, hasCover)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!_memberController.isOwner.value)
-                    Positioned(
-                      right: 16,
-                      bottom: 16,
-                      child:
-                          _buildActionButtons(theme, hasCover, isNarrowScreen),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
       );
     });
-  }
-
-  Widget _buildAvatar(ThemeData theme, bool hasCover) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: hasCover ? Colors.white : theme.colorScheme.primary,
-          width: 3,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: hasCover
-                ? Colors.black.withAlpha(80)
-                : theme.colorScheme.shadow.withAlpha(50),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Obx(() {
-        final face = _memberController.face.value;
-        if (face.isNotEmpty) {
-          return ClipOval(
-            child: NetworkImgLayer(
-                src: face, width: 70, height: 70, type: 'avatar'),
-          );
-        }
-        return CircleAvatar(
-          radius: 35,
-          backgroundColor: theme.colorScheme.surface,
-          child: Icon(Icons.person, size: 40, color: theme.colorScheme.primary),
-        );
-      }),
-    );
-  }
-
-  Widget _buildUserDetails(ThemeData theme, bool hasCover) {
-    final textColor = hasCover ? Colors.white : theme.colorScheme.onSurface;
-    final subTextColor =
-        hasCover ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Obx(() => Text(
-              _memberController.memberInfo.value.name ?? '',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
-            )),
-        const SizedBox(height: 4),
-        Text('UID: $mid', style: TextStyle(fontSize: 13, color: subTextColor)),
-        const SizedBox(height: 8),
-        Obx(() => Row(
-              children: [
-                _buildStatItem(
-                    '关注',
-                    _memberController.memberInfo.value.attention?.toString() ??
-                        '0',
-                    textColor,
-                    subTextColor),
-                const SizedBox(width: 16),
-                _buildStatItem(
-                    '粉丝',
-                    _memberController.memberInfo.value.fans?.toString() ?? '0',
-                    textColor,
-                    subTextColor),
-              ],
-            )),
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(
-      ThemeData theme, bool hasCover, bool isNarrowScreen) {
-    final textColor = hasCover ? Colors.white : theme.colorScheme.onSurface;
-    final subTextColor =
-        hasCover ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
-
-    return Obx(() {
-      if (isNarrowScreen) {
-        return FilledButton(
-          onPressed: _memberController.actionRelationMod,
-          child: Text(_memberController.attributeText.value),
-        );
-      }
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FilledButton(
-            onPressed: _memberController.actionRelationMod,
-            child: Text(_memberController.attributeText.value),
-          ),
-          const SizedBox(width: 8),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: textColor,
-              side: BorderSide(color: subTextColor),
-            ),
-            onPressed: () => Get.toNamed('/message', parameters: {
-              'mid': mid.toString(),
-              'name': _memberController.memberInfo.value.name ?? '',
-              'face': _memberController.face.value,
-            }),
-            child: const Text('发消息'),
-          ),
-        ],
-      );
-    });
-  }
-
-  Widget _buildStatItem(
-      String label, String value, Color valueColor, Color labelColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(value,
-            style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: valueColor)),
-        Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
-      ],
-    );
   }
 }
 

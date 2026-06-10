@@ -1,7 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:piliotto/common/widgets/network_img_layer.dart';
+import 'package:piliotto/common/widgets/user_profile_header.dart';
 import 'package:piliotto/models/common/theme_type.dart';
 import 'package:piliotto/pages/fav/index.dart';
 import 'package:piliotto/pages/history/index.dart';
@@ -104,178 +103,30 @@ class _MinePageState extends State<MinePage> {
 
   Widget _buildHeaderWithUserInfo(ThemeData theme) {
     return Obx(() {
-      final cover = mineController.userInfo.value.cover;
-      final hasCover = cover != null && cover.isNotEmpty;
-      return Container(
+      final userInfo = mineController.userInfo.value;
+      final userStat = mineController.userStat.value;
+      final isLogin = mineController.userLogin.value;
+
+      return UserProfileHeader(
+        coverUrl: userInfo.cover,
+        avatarUrl: userInfo.face,
+        userName: isLogin ? userInfo.uname : '点击头像登录',
+        userId: isLogin ? userInfo.mid?.toString() : null,
+        followingCount: isLogin ? userStat.following?.toString() : null,
+        followerCount: isLogin ? userStat.follower?.toString() : null,
+        onAvatarTap: () => mineController.onLogin(),
+        onFollowingTap: isLogin ? () => mineController.pushFollow() : null,
+        onFollowerTap: isLogin ? () => mineController.pushFans() : null,
         height: 280,
-        color: theme.colorScheme.secondaryContainer,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (hasCover)
-              CachedNetworkImage(
-                imageUrl: cover.startsWith('//') ? 'https:$cover' : cover,
-                fit: BoxFit.cover,
-                fadeInDuration: const Duration(milliseconds: 300),
-                fadeOutDuration: const Duration(milliseconds: 120),
-                placeholder: (context, url) => const SizedBox.shrink(),
-                errorWidget: (context, url, error) => const SizedBox.shrink(),
-              ),
-            Container(
-              color: hasCover ? Colors.black.withAlpha(100) : Colors.transparent,
-            ),
-            SafeArea(
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                  child: Row(
-                    children: [
-                      _buildAvatar(theme, hasCover),
-                      const SizedBox(width: 16),
-                      Expanded(child: _buildUserDetails(theme, hasCover)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        avatarSize: 80,
+        extraContent: !isLogin
+            ? FilledButton(
+                onPressed: () => Get.toNamed('/loginPage'),
+                child: const Text('立即登录'),
+              )
+            : null,
       );
     });
-  }
-
-  Widget _buildAvatar(ThemeData theme, bool hasCover) {
-    return GestureDetector(
-      onTap: () => mineController.onLogin(),
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: hasCover ? Colors.white : theme.colorScheme.primary,
-            width: 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: hasCover
-                  ? Colors.black.withAlpha(80)
-                  : theme.colorScheme.shadow.withAlpha(50),
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Obx(() {
-          final face = mineController.userInfo.value.face;
-          if (face != null && face.isNotEmpty) {
-            return ClipOval(
-              child: NetworkImgLayer(
-                src: face,
-                width: 80,
-                height: 80,
-                type: 'avatar',
-              ),
-            );
-          }
-          return CircleAvatar(
-            radius: 40,
-            backgroundColor: theme.colorScheme.surface,
-            child: Icon(
-              Icons.person,
-              size: 45,
-              color: theme.colorScheme.primary,
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildUserDetails(ThemeData theme, bool hasCover) {
-    final textColor = hasCover ? Colors.white : theme.colorScheme.onSurface;
-    final subTextColor =
-        hasCover ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Obx(() => Text(
-              mineController.userInfo.value.uname ?? '点击头像登录',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
-            )),
-        const SizedBox(height: 4),
-        Obx(() {
-          if (mineController.userLogin.value) {
-            return Text(
-              'UID: ${mineController.userInfo.value.mid}',
-              style: TextStyle(fontSize: 13, color: subTextColor),
-            );
-          }
-          return const SizedBox.shrink();
-        }),
-        const SizedBox(height: 8),
-        Obx(() {
-          if (mineController.userLogin.value) {
-            return Row(
-              children: [
-                _buildStatItem(
-                  '关注',
-                  mineController.userStat.value.following?.toString() ?? '0',
-                  () => mineController.pushFollow(),
-                  textColor,
-                  subTextColor,
-                ),
-                const SizedBox(width: 16),
-                _buildStatItem(
-                  '粉丝',
-                  mineController.userStat.value.follower?.toString() ?? '0',
-                  () => mineController.pushFans(),
-                  textColor,
-                  subTextColor,
-                ),
-              ],
-            );
-          }
-          return const SizedBox.shrink();
-        }),
-        const SizedBox(height: 12),
-        Obx(() {
-          if (!mineController.userLogin.value) {
-            return FilledButton(
-              onPressed: () => Get.toNamed('/loginPage'),
-              child: const Text('立即登录'),
-            );
-          }
-          return const SizedBox.shrink();
-        }),
-      ],
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, VoidCallback onTap,
-      Color valueColor, Color labelColor) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: valueColor),
-          ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: labelColor),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildContent(BuildContext context, ThemeData theme) {

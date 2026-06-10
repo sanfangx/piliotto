@@ -9,11 +9,21 @@ import 'package:piliotto/repositories/i_dynamics_repository.dart';
 import 'package:piliotto/models/common/dynamics_type.dart';
 import 'package:piliotto/ottohub/models/dynamics/result.dart';
 import 'package:piliotto/utils/feed_back.dart';
+import 'package:piliotto/utils/waterfall_layout_calculator.dart';
+import 'package:piliotto/utils/waterfall_layout_settings.dart';
 
 import 'package:piliotto/utils/storage.dart';
 
 class DynamicsController extends GetxController {
   final IDynamicsRepository _dynamicsRepo = Get.find<IDynamicsRepository>();
+
+  // 瀑布流布局服务
+  final WaterfallLayoutCalculator _layoutCalculator = WaterfallLayoutCalculator(
+    minItemWidth: 300.0,
+    crossAxisSpacing: 12.0,
+  );
+  late final WaterfallLayoutSettings _layoutSettings;
+
   int page = 1;
   String? offset = '';
   RxList<DynamicItemModel> dynamicsList = <DynamicItemModel>[].obs;
@@ -70,17 +80,6 @@ class DynamicsController extends GetxController {
     'popular': ScrollController(),
   };
   RxBool hasMore = true.obs;
-  RxString wideScreenLayout = 'center'.obs;
-  RxInt waterfallCrossAxisCount = 3.obs;
-  RxBool waterfallLimitWidth = false.obs;
-  RxDouble waterfallCustomItemWidth = 300.0.obs;
-  RxBool waterfallUseCustomItemWidth = false.obs;
-
-  // 缓存的瀑布流计算结果
-  int _cachedAutoCrossAxisCount = 3;
-  double _cachedItemWidth = 300.0;
-  int _cachedEffectiveCrossAxisCount = 3;
-  double _lastScreenWidth = 0;
 
   Timer? _pollTimer;
   static const Duration _pollInterval = Duration(seconds: 30);
@@ -89,32 +88,13 @@ class DynamicsController extends GetxController {
 
   @override
   void onInit() {
+    _layoutSettings = WaterfallLayoutSettings(GStrorage.setting);
     userInfo = userInfoCache.get('userInfoCache');
     userLogin.value = userInfo != null;
     super.onInit();
     initialValue.value =
         setting.get(SettingBoxKey.defaultDynamicType, defaultValue: 0);
     dynamicsType = DynamicsType.values[initialValue.value].obs;
-    wideScreenLayout.value = setting.get(
-      SettingBoxKey.dynamicWideScreenLayout,
-      defaultValue: 'center',
-    );
-    waterfallCrossAxisCount.value = setting.get(
-      SettingBoxKey.waterfallCrossAxisCount,
-      defaultValue: 3,
-    );
-    waterfallLimitWidth.value = setting.get(
-      SettingBoxKey.waterfallLimitWidth,
-      defaultValue: false,
-    );
-    waterfallCustomItemWidth.value = setting.get(
-      SettingBoxKey.waterfallCustomItemWidth,
-      defaultValue: 300.0,
-    );
-    waterfallUseCustomItemWidth.value = setting.get(
-      SettingBoxKey.waterfallUseCustomItemWidth,
-      defaultValue: false,
-    );
     _startPolling();
   }
 
@@ -196,98 +176,52 @@ class DynamicsController extends GetxController {
     }
   }
 
-  void toggleWideScreenLayout() {
-    if (wideScreenLayout.value == 'center') {
-      wideScreenLayout.value = 'waterfall';
-    } else {
-      wideScreenLayout.value = 'center';
-    }
-    setting.put(SettingBoxKey.dynamicWideScreenLayout, wideScreenLayout.value);
+  // ========== 瀑布流布局相关方法 ==========
+
+  /// 获取当前布局模式
+  String get layoutMode => _layoutSettings.layoutMode;
+
+  /// 获取瀑布流布局配置
+  WaterfallLayoutConfig getLayoutConfig(double screenWidth) {
+    return _layoutCalculator.calculate(
+      screenWidth,
+      limitWidth: _layoutSettings.limitWidth,
+      fixedCrossAxisCount: _layoutSettings.crossAxisCount,
+      customItemWidth: _layoutSettings.useCustomItemWidth
+          ? _layoutSettings.customItemWidth
+          : null,
+    );
   }
 
-  void setWaterfallCrossAxisCount(int count) {
-    waterfallCrossAxisCount.value = count.clamp(2, 6);
-    setting.put(
-        SettingBoxKey.waterfallCrossAxisCount, waterfallCrossAxisCount.value);
+  /// 切换布局模式
+  void toggleLayoutMode() {
+    _layoutSettings.toggleLayoutMode();
   }
 
-  void toggleWaterfallLimitWidth([bool? value]) {
-    waterfallLimitWidth.value = value ?? !waterfallLimitWidth.value;
-    setting.put(SettingBoxKey.waterfallLimitWidth, waterfallLimitWidth.value);
-    _invalidateCache();
+  /// 设置瀑布流列数
+  void setCrossAxisCount(int count) {
+    _layoutSettings.crossAxisCount = count;
   }
 
-  void toggleWaterfallUseCustomItemWidth([bool? value]) {
-    waterfallUseCustomItemWidth.value =
-        value ?? !waterfallUseCustomItemWidth.value;
-    setting.put(SettingBoxKey.waterfallUseCustomItemWidth,
-        waterfallUseCustomItemWidth.value);
-    _invalidateCache();
+  /// 切换限制宽度
+  void toggleLimitWidth([bool? value]) {
+    _layoutSettings.toggleLimitWidth(value);
   }
 
-  void setWaterfallCustomItemWidth(double width) {
-    waterfallCustomItemWidth.value = width.clamp(200.0, 600.0);
-    setting.put(
-        SettingBoxKey.waterfallCustomItemWidth, waterfallCustomItemWidth.value);
+  /// 切换使用自定义宽度
+  void toggleUseCustomItemWidth([bool? value]) {
+    _layoutSettings.toggleUseCustomItemWidth(value);
   }
 
-  void _invalidateCache() {
-    _lastScreenWidth = 0;
+  /// 设置自定义卡片宽度
+  void setCustomItemWidth(double width) {
+    _layoutSettings.customItemWidth = width;
   }
 
-  double getEffectiveItemWidth(
-      double screenWidth, int autoCrossAxisCount, double crossAxisSpacing) {
-    if (waterfallUseCustomItemWidth.value) {
-      return waterfallCustomItemWidth.value;
-    }
-    return calculateItemWidth(
-        screenWidth, autoCrossAxisCount, crossAxisSpacing);
-  }
+  /// 获取布局设置（供 UI 使用）
+  WaterfallLayoutSettings get layoutSettings => _layoutSettings;
 
-  void updateWaterfallCache(double screenWidth,
-      {double minItemWidth = 300.0, double crossAxisSpacing = 12.0}) {
-    if ((_lastScreenWidth - screenWidth).abs() < 1.0) {
-      return;
-    }
-    _lastScreenWidth = screenWidth;
-    _cachedAutoCrossAxisCount =
-        calculateAutoCrossAxisCount(screenWidth, minItemWidth);
-    _cachedItemWidth = waterfallUseCustomItemWidth.value
-        ? waterfallCustomItemWidth.value
-        : calculateItemWidth(
-            screenWidth, _cachedAutoCrossAxisCount, crossAxisSpacing);
-    _cachedEffectiveCrossAxisCount = waterfallLimitWidth.value
-        ? waterfallCrossAxisCount.value.clamp(2, _cachedAutoCrossAxisCount)
-        : _cachedAutoCrossAxisCount;
-  }
-
-  int get cachedAutoCrossAxisCount => _cachedAutoCrossAxisCount;
-  double get cachedItemWidth => _cachedItemWidth;
-  int get cachedEffectiveCrossAxisCount => _cachedEffectiveCrossAxisCount;
-
-  double getAutoItemWidth(double screenWidth, double crossAxisSpacing) {
-    return calculateItemWidth(
-        screenWidth, _cachedAutoCrossAxisCount, crossAxisSpacing);
-  }
-
-  int calculateAutoCrossAxisCount(double screenWidth, double minItemWidth) {
-    final count = (screenWidth / minItemWidth).floor();
-    return count.clamp(2, 6);
-  }
-
-  double calculateItemWidth(
-      double screenWidth, int autoCrossAxisCount, double crossAxisSpacing) {
-    return (screenWidth - (autoCrossAxisCount - 1) * crossAxisSpacing) /
-        autoCrossAxisCount;
-  }
-
-  int getEffectiveCrossAxisCount(double screenWidth, double minItemWidth) {
-    final autoCount = calculateAutoCrossAxisCount(screenWidth, minItemWidth);
-    if (!waterfallLimitWidth.value) {
-      return autoCount;
-    }
-    return waterfallCrossAxisCount.value.clamp(2, autoCount);
-  }
+  // ========== 业务逻辑方法 ==========
 
   Future<void> queryFollowDynamic({String type = 'init'}) async {
     final tab = currentTab.value;

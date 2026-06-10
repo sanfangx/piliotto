@@ -125,16 +125,18 @@ class _DynamicsPageState extends State<DynamicsPage>
           const Spacer(),
           if (isWideScreen)
             Obx(() => IconButton(
-                  onPressed: () => _dynamicsController.toggleWideScreenLayout(),
+                  onPressed: () => _dynamicsController.toggleLayoutMode(),
                   onLongPress: () => _showWaterfallConfigDialog(context),
                   icon: Icon(
-                    _dynamicsController.wideScreenLayout.value == 'center'
+                    _dynamicsController.layoutSettings.layoutModeRx.value ==
+                            'center'
                         ? Icons.view_column_outlined
                         : Icons.view_agenda_outlined,
                     color: colorScheme.onSurface,
                   ),
                   tooltip:
-                      _dynamicsController.wideScreenLayout.value == 'center'
+                      _dynamicsController.layoutSettings.layoutModeRx.value ==
+                              'center'
                           ? '切换为瀑布流布局'
                           : '切换为居中布局',
                 )),
@@ -153,7 +155,7 @@ class _DynamicsPageState extends State<DynamicsPage>
   void _showWaterfallConfigDialog(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
-    _dynamicsController.updateWaterfallCache(screenWidth);
+    final settings = _dynamicsController.layoutSettings;
 
     showDialog(
       context: context,
@@ -163,100 +165,104 @@ class _DynamicsPageState extends State<DynamicsPage>
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           alignment: Alignment.topCenter,
-          child: Obx(() {
-            _dynamicsController.updateWaterfallCache(screenWidth);
-            final autoCrossAxisCount =
-                _dynamicsController.cachedAutoCrossAxisCount;
-            final autoItemWidth =
-                _dynamicsController.getAutoItemWidth(screenWidth, 12.0);
-            final limitWidth = _dynamicsController.waterfallLimitWidth.value;
-            final useCustomWidth =
-                _dynamicsController.waterfallUseCustomItemWidth.value;
-            final customWidth =
-                _dynamicsController.waterfallCustomItemWidth.value;
-            final crossAxisCount =
-                _dynamicsController.waterfallCrossAxisCount.value;
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              final currentConfig = _dynamicsController.getLayoutConfig(screenWidth);
+              final autoCrossAxisCount = currentConfig.autoCrossAxisCount;
+              final autoItemWidth = (screenWidth - (autoCrossAxisCount - 1) * 12.0) / autoCrossAxisCount;
+              final limitWidth = settings.limitWidth;
+              final useCustomWidth = settings.useCustomItemWidth;
+              final customWidth = settings.customItemWidth;
+              final crossAxisCount = settings.crossAxisCount;
 
-            final columnItems = List.generate(
-              autoCrossAxisCount - 1,
-              (index) => DropdownMenuItem(
-                value: index + 2,
-                child: Text('${index + 2} 列'),
-              ),
-            );
-
-            final effectiveCrossAxisCount =
-                crossAxisCount.clamp(2, autoCrossAxisCount);
-
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SwitchListTile(
-                  title: const Text('限制宽度'),
-                  subtitle: const Text('启用后可自定义列数'),
-                  value: limitWidth,
-                  onChanged: _dynamicsController.toggleWaterfallLimitWidth,
+              final columnItems = List.generate(
+                autoCrossAxisCount - 1,
+                (index) => DropdownMenuItem(
+                  value: index + 2,
+                  child: Text('${index + 2} 列'),
                 ),
-                SwitchListTile(
-                  title: const Text('自定义卡片宽度'),
-                  subtitle: Text(useCustomWidth
-                      ? '当前: ${customWidth.toStringAsFixed(0)}px'
-                      : '自动计算: ${autoItemWidth.toStringAsFixed(0)}px'),
-                  value: useCustomWidth,
-                  onChanged:
-                      _dynamicsController.toggleWaterfallUseCustomItemWidth,
-                ),
-                if (useCustomWidth) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Text('卡片宽度: '),
-                      Expanded(
-                        child: Slider(
-                          value: customWidth,
-                          min: 200,
-                          max: 600,
-                          divisions: 40,
-                          label: '${customWidth.toStringAsFixed(0)}px',
-                          onChanged:
-                              _dynamicsController.setWaterfallCustomItemWidth,
+              );
+
+              final effectiveCrossAxisCount =
+                  crossAxisCount.clamp(2, autoCrossAxisCount);
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SwitchListTile(
+                    title: const Text('限制宽度'),
+                    subtitle: const Text('启用后可自定义列数'),
+                    value: limitWidth,
+                    onChanged: (value) {
+                      _dynamicsController.toggleLimitWidth(value);
+                      setState(() {});
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text('自定义卡片宽度'),
+                    subtitle: Text(useCustomWidth
+                        ? '当前: ${customWidth.toStringAsFixed(0)}px'
+                        : '自动计算: ${autoItemWidth.toStringAsFixed(0)}px'),
+                    value: useCustomWidth,
+                    onChanged: (value) {
+                      _dynamicsController.toggleUseCustomItemWidth(value);
+                      setState(() {});
+                    },
+                  ),
+                  if (useCustomWidth) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Text('卡片宽度: '),
+                        Expanded(
+                          child: Slider(
+                            value: customWidth,
+                            min: 200,
+                            max: 600,
+                            divisions: 40,
+                            label: '${customWidth.toStringAsFixed(0)}px',
+                            onChanged: (value) {
+                              _dynamicsController.setCustomItemWidth(value);
+                              setState(() {});
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ],
+                  const Divider(),
+                  Text(
+                    '当前屏幕自动计算列数: $autoCrossAxisCount',
+                    style: TextStyle(
+                      color: colorScheme.outline,
+                      fontSize: 12,
+                    ),
                   ),
+                  if (limitWidth) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Text('瀑布流列数: '),
+                        const SizedBox(width: 8),
+                        DropdownButton<int>(
+                          value: effectiveCrossAxisCount,
+                          items: columnItems,
+                          onChanged: (value) {
+                            if (value != null) {
+                              _dynamicsController.setCrossAxisCount(value);
+                              setState(() {});
+                            }
+                          },
+                          underline: const SizedBox(),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-                const Divider(),
-                Text(
-                  '当前屏幕自动计算列数: $autoCrossAxisCount',
-                  style: TextStyle(
-                    color: colorScheme.outline,
-                    fontSize: 12,
-                  ),
-                ),
-                if (limitWidth) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Text('瀑布流列数: '),
-                      const SizedBox(width: 8),
-                      DropdownButton<int>(
-                        value: effectiveCrossAxisCount,
-                        items: columnItems,
-                        onChanged: (value) {
-                          if (value != null) {
-                            _dynamicsController
-                                .setWaterfallCrossAxisCount(value);
-                          }
-                        },
-                        underline: const SizedBox(),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            );
-          }),
+              );
+            },
+          ),
         ),
         actions: [
           TextButton(
@@ -299,13 +305,14 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
 
       final cachedList = widget.dynamicsController.getTabData(widget.tab);
       final hasLoaded = widget.dynamicsController.hasTabLoaded(widget.tab);
-      final wideScreenLayout = widget.dynamicsController.wideScreenLayout.value;
+      final layoutMode =
+          widget.dynamicsController.layoutSettings.layoutModeRx.value;
 
       if (cachedList.isEmpty && !hasLoaded) {
         if (widget.dynamicsController.tabLoadingStates[widget.tab]!.value &&
             isCurrentTab) {
           return _buildSkeletonList(
-              isWideScreen, screenWidth, wideScreenLayout);
+              isWideScreen, screenWidth, layoutMode);
         } else {
           return NoData(
             onRefresh: () => widget.dynamicsController.onRefresh(),
@@ -333,7 +340,7 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
             colorScheme,
             isWideScreen,
             screenWidth,
-            wideScreenLayout,
+            layoutMode,
           ),
         ),
       );
@@ -345,9 +352,9 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
     ColorScheme colorScheme,
     bool isWideScreen,
     double screenWidth,
-    String wideScreenLayout,
+    String layoutMode,
   ) {
-    if (isWideScreen && wideScreenLayout == 'waterfall') {
+    if (isWideScreen && layoutMode == 'waterfall') {
       return _buildWaterfallList(cachedList, colorScheme, screenWidth);
     }
 
@@ -445,12 +452,12 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
     double screenWidth,
   ) {
     const crossAxisSpacing = 12.0;
-    widget.dynamicsController.updateWaterfallCache(screenWidth);
+    final layoutConfig = widget.dynamicsController.getLayoutConfig(screenWidth);
+    final settings = widget.dynamicsController.layoutSettings;
 
-    final effectiveCrossAxisCount =
-        widget.dynamicsController.cachedEffectiveCrossAxisCount;
-    final itemWidth = widget.dynamicsController.cachedItemWidth;
-    final limitWidth = widget.dynamicsController.waterfallLimitWidth.value;
+    final effectiveCrossAxisCount = layoutConfig.crossAxisCount;
+    final itemWidth = layoutConfig.itemWidth;
+    final limitWidth = settings.limitWidth;
 
     final scrollController =
         widget.dynamicsController.tabScrollControllers[widget.tab];
@@ -560,8 +567,8 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildSkeletonList(
-      bool isWideScreen, double screenWidth, String wideScreenLayout) {
-    if (isWideScreen && wideScreenLayout == 'waterfall') {
+      bool isWideScreen, double screenWidth, String layoutMode) {
+    if (isWideScreen && layoutMode == 'waterfall') {
       return _buildWaterfallSkeletonList(screenWidth);
     }
 
@@ -584,12 +591,12 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
 
   Widget _buildWaterfallSkeletonList(double screenWidth) {
     const crossAxisSpacing = 12.0;
-    widget.dynamicsController.updateWaterfallCache(screenWidth);
+    final layoutConfig = widget.dynamicsController.getLayoutConfig(screenWidth);
+    final settings = widget.dynamicsController.layoutSettings;
 
-    final effectiveCrossAxisCount =
-        widget.dynamicsController.cachedEffectiveCrossAxisCount;
-    final itemWidth = widget.dynamicsController.cachedItemWidth;
-    final limitWidth = widget.dynamicsController.waterfallLimitWidth.value;
+    final effectiveCrossAxisCount = layoutConfig.crossAxisCount;
+    final itemWidth = layoutConfig.itemWidth;
+    final limitWidth = settings.limitWidth;
 
     if (limitWidth) {
       final gridWidth = effectiveCrossAxisCount * itemWidth +
