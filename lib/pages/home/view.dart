@@ -5,6 +5,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/pages/main/controller.dart';
 import 'package:piliotto/pages/mine/index.dart';
@@ -97,7 +98,7 @@ class _HomePageState extends State<HomePage>
             isNarrowScreen: isNarrowScreen,
           ),
           if (_homeController.tabs.length > 1) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             SizedBox(
               width: double.infinity,
               height: 42,
@@ -258,12 +259,12 @@ class UserInfoWidget extends StatelessWidget {
                     isNarrowScreen: isNarrowScreen,
                   ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
         ],
         HomeSearchBar(ctr: ctr),
         if (!isNarrowScreen) ...[
           if (userLogin.value) ...[
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             ClipRect(
               child: IconButton(
                 onPressed: () => Get.toNamed('/message'),
@@ -271,7 +272,7 @@ class UserInfoWidget extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Obx(
             () => userLogin.value
                 ? buildLoggedInWidget(context)
@@ -473,7 +474,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                           Text(
                             '搜索历史',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: AppFontSize.sm,
                               color: Theme.of(context).colorScheme.outline,
                             ),
                           ),

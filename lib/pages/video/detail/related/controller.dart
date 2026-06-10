@@ -13,8 +13,7 @@ class RelatedController extends GetxController {
 
   Future<dynamic> queryRelatedVideo() async {
     try {
-      final VideoListResponse response =
-          await _videoRepo.getRelatedVideos(vid);
+      final VideoListResponse response = await _videoRepo.getRelatedVideos(vid);
       relatedVideoList.value = response.videoList;
       return {'status': true, 'data': response.videoList};
     } catch (e) {

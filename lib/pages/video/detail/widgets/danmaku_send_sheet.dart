@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 
 class DanmakuSendSheet extends StatefulWidget {
   final int vid;
@@ -140,7 +141,7 @@ class _DanmakuSendSheetState extends State<DanmakuSendSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.base),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -157,7 +158,7 @@ class _DanmakuSendSheetState extends State<DanmakuSendSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -179,7 +180,7 @@ class _DanmakuSendSheetState extends State<DanmakuSendSheet> {
                         decoration: InputDecoration(
                           hintText: '发一条弹幕喵~',
                           hintStyle: TextStyle(
-                            fontSize: 14,
+                            fontSize: AppFontSize.base,
                             color: theme.colorScheme.outline,
                           ),
                           border: InputBorder.none,
@@ -193,7 +194,7 @@ class _DanmakuSendSheetState extends State<DanmakuSendSheet> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   IconButton.filled(
                     onPressed: _isSending ? null : _handleSend,
                     icon: _isSending
@@ -209,14 +210,14 @@ class _DanmakuSendSheetState extends State<DanmakuSendSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.base),
               Text(
                 '弹幕类型',
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Row(
                 children: _modeOptions.map((option) {
                   final isSelected = _danmakuMode == option['value'];
@@ -249,14 +250,14 @@ class _DanmakuSendSheetState extends State<DanmakuSendSheet> {
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.base),
               Text(
                 '弹幕颜色',
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Wrap(
                 spacing: 8,
                 runSpacing: 4,
@@ -293,14 +294,14 @@ class _DanmakuSendSheetState extends State<DanmakuSendSheet> {
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.base),
               Text(
                 '字体大小',
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Row(
                 children: _fontSizeOptions.map((option) {
                   final isSelected = _danmakuFontSize == option['value'];

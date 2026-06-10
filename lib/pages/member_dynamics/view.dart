@@ -86,18 +86,17 @@ class _MemberDynamicsPageState extends State<MemberDynamicsPage> {
                               width: isWideScreen ? maxContentWidth : null,
                               child: DynamicPanel(
                                 item: list[index],
-                                onTap: () => Get.toNamed('/dynamicDetail',
-                                    arguments: {
-                                      'item': list[index],
-                                      'floor': 1,
-                                    }),
-                                onCommentTap: () => Get.toNamed(
-                                    '/dynamicDetail',
-                                    arguments: {
-                                      'item': list[index],
-                                      'floor': 1,
-                                      'action': 'comment',
-                                    }),
+                                onTap: () =>
+                                    Get.toNamed('/dynamicDetail', arguments: {
+                                  'item': list[index],
+                                  'floor': 1,
+                                }),
+                                onCommentTap: () =>
+                                    Get.toNamed('/dynamicDetail', arguments: {
+                                  'item': list[index],
+                                  'floor': 1,
+                                  'action': 'comment',
+                                }),
                               ),
                             );
                           },

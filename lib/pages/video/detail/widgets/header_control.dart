@@ -7,6 +7,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/repositories/i_danmaku_repository.dart';
 
 import 'package:piliotto/pages/video/detail/index.dart';
@@ -43,8 +44,8 @@ class HeaderControl extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HeaderControlState extends State<HeaderControl> {
-  static const TextStyle subTitleStyle = TextStyle(fontSize: 12);
-  static const TextStyle titleStyle = TextStyle(fontSize: 14);
+  static const TextStyle subTitleStyle = TextStyle(fontSize: AppFontSize.sm);
+  static const TextStyle titleStyle = TextStyle(fontSize: AppFontSize.base);
   Size get preferredSize => const Size(double.infinity, kToolbarHeight);
   final Box<dynamic> localCache = GStrorage.localCache;
   final Box<dynamic> videoStorage = GStrorage.video;
@@ -180,7 +181,7 @@ class _HeaderControlState extends State<HeaderControl> {
               icon: const Icon(Icons.close, size: 20),
               onPressed: onClose,
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSpacing.lg),
           ],
         ),
         Expanded(child: _buildRouteContent(routeName)),
@@ -794,7 +795,7 @@ class _HeaderControlState extends State<HeaderControl> {
     final playerController = widget.controller!;
     const TextStyle textStyle = TextStyle(
       color: Colors.white,
-      fontSize: 12,
+      fontSize: AppFontSize.sm,
     );
     final bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
@@ -845,7 +846,7 @@ class _HeaderControlState extends State<HeaderControl> {
                       videoIntroController?.videoDetail.value.title ?? '',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: AppFontSize.lg,
                       ),
                     ),
                   ),
@@ -1110,7 +1111,7 @@ class _BottomControlSettingSheetState extends State<_BottomControlSettingSheet>
                 '添加按钮',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -1187,7 +1188,7 @@ class _BottomControlSettingSheetState extends State<_BottomControlSettingSheet>
               '暂无按钮',
               style: TextStyle(color: Theme.of(context).colorScheme.outline),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               '点击下方按钮添加',
               style: TextStyle(color: Theme.of(context).colorScheme.outline),

@@ -4,6 +4,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:piliotto/models/github/latest.dart';
+import 'package:piliotto/services/developer_mode_service.dart';
 import 'package:piliotto/utils/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,6 +17,36 @@ class AboutPage extends StatefulWidget {
 
 class _AboutPageState extends State<AboutPage> {
   final AboutController _aboutController = Get.put(AboutController());
+  final DeveloperModeService _developerModeService = DeveloperModeService();
+
+  int _clickCount = 0;
+  DateTime? _lastClickTime;
+
+  void _handleVersionClick() {
+    final now = DateTime.now();
+
+    // 如果已经是开发者模式，显示提示
+    if (_developerModeService.isDeveloperMode()) {
+      SmartDialog.showToast('已处于开发者模式');
+      return;
+    }
+
+    // 检查点击间隔是否超过1秒
+    if (_lastClickTime != null &&
+        now.difference(_lastClickTime!).inSeconds > 1) {
+      _clickCount = 0;
+    }
+
+    _lastClickTime = now;
+    _clickCount++;
+
+    // 连续点击7次激活开发者模式
+    if (_clickCount >= 7) {
+      _developerModeService.enableDeveloperMode();
+      SmartDialog.showToast('已开启开发者模式');
+      _clickCount = 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +79,7 @@ class _AboutPageState extends State<AboutPage> {
                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
                   child: FilledButton.tonal(
                     onPressed: () {
+                      _handleVersionClick();
                       showModalBottomSheet(
                         context: context,
                         builder: (context) {
@@ -123,8 +155,13 @@ class AboutController extends GetxController {
   }
 
   Future getCurrentApp() async {
-    var result = await PackageInfo.fromPlatform();
-    currentVersion.value = result.version;
+    try {
+      var result = await PackageInfo.fromPlatform();
+      currentVersion.value = result.version;
+    } catch (e) {
+      // 获取版本信息失败时使用默认值
+      currentVersion.value = '1.0.0';
+    }
   }
 
   Future getRemoteApp() async {

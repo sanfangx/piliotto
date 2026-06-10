@@ -148,10 +148,8 @@ class _HistoryPageState extends State<HistoryPage> {
                     }
                   } else {
                     return SliverGrid(
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount:
-                            _historyController.crossAxisCount.value,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: _historyController.crossAxisCount.value,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
                         childAspectRatio: 3 / 1,

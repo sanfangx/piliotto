@@ -40,7 +40,6 @@ class AnimatedDialogState extends State<AnimatedDialog>
   Widget build(BuildContext context) {
     return Material(
       color: Colors.black.withValues(alpha: opacityAnimation!.value * 255),
-
       child: InkWell(
         splashColor: Colors.transparent,
         onTap: () => widget.closeFn!(),

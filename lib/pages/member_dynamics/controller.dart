@@ -32,7 +32,8 @@ class MemberDynamicsController extends GetxController {
     }
     isLoading.value = true;
     try {
-      final blogList = await _dynamicsRepo.getUserBlogs(uid: mid, offset: offset, num: 10);
+      final blogList =
+          await _dynamicsRepo.getUserBlogs(uid: mid, offset: offset, num: 10);
       if (blogList.isNotEmpty) {
         dynamicsList.addAll(blogList);
         offset += blogList.length;

@@ -3,6 +3,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:piliotto/models/common/theme_type.dart';
+import 'package:piliotto/services/developer_mode_service.dart';
 import 'package:piliotto/utils/feed_back.dart';
 import 'package:piliotto/utils/login.dart';
 import 'package:piliotto/utils/storage.dart';
@@ -16,6 +17,8 @@ class SettingController extends GetxController {
   Box setting = GStrorage.setting;
   Box localCache = GStrorage.localCache;
 
+  final DeveloperModeService _developerModeService = DeveloperModeService();
+
   RxBool userLogin = false.obs;
   RxBool feedBackEnable = false.obs;
   RxDouble toastOpacity = (1.0).obs;
@@ -24,6 +27,7 @@ class SettingController extends GetxController {
   dynamic userInfo;
   Rx<DynamicBadgeMode> dynamicBadgeType = DynamicBadgeMode.number.obs;
   RxInt defaultHomePage = 0.obs;
+  RxBool isDeveloperMode = false.obs;
 
   @override
   void onInit() {
@@ -43,6 +47,7 @@ class SettingController extends GetxController {
         defaultValue: DynamicBadgeMode.number.code)];
     defaultHomePage.value =
         setting.get(SettingBoxKey.defaultHomePage, defaultValue: 0);
+    isDeveloperMode.value = _developerModeService.isDeveloperMode();
   }
 
   Future<void> loginOut() async {

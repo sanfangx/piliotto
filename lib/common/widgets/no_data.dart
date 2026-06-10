@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 
 class NoData extends StatelessWidget {
   const NoData({
@@ -34,14 +35,14 @@ class NoData extends StatelessWidget {
                 "assets/images/error.svg",
                 height: iconSize ?? 200,
               ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
           Text(
             title ?? '没有数据',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               subtitle!,
               textAlign: TextAlign.center,
@@ -51,7 +52,7 @@ class NoData extends StatelessWidget {
             ),
           ],
           if (shouldShowRefreshButton) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
               onPressed: onRefresh,
               icon: const Icon(Icons.refresh),

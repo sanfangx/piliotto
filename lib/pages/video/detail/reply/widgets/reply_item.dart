@@ -223,8 +223,7 @@ class _ReplyItemState extends State<ReplyItem> {
                                       color: colorScheme.onSecondaryContainer,
                                     ),
                                   ),
-                                ))
-                            ,
+                                )),
                       if (widget.replyItem!.isUp!)
                         const Padding(
                           padding: EdgeInsets.only(left: 6),
@@ -680,7 +679,8 @@ class MorePanel extends StatelessWidget {
                   onPressed: () async {
                     Navigator.of(ctx).pop();
                     try {
-                      final result = await Get.find<ICommentRepository>().deleteVideoComment(
+                      final result = await Get.find<ICommentRepository>()
+                          .deleteVideoComment(
                         vcid: item.rpid!,
                       );
                       if (result['status'] == 'success') {

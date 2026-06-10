@@ -5,7 +5,8 @@ import '../models/video/reply/content.dart';
 import 'package:piliotto/repositories/base_repository.dart';
 import 'package:piliotto/repositories/i_comment_repository.dart';
 
-class OttohubCommentRepository extends BaseRepository implements ICommentRepository {
+class OttohubCommentRepository extends BaseRepository
+    implements ICommentRepository {
   ReplyItemModel _convertCommentToReplyItemModel(
     Map<String, dynamic> comment, {
     int? oid,

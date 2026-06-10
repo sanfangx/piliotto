@@ -58,8 +58,8 @@ class DynamicItemModel {
     }
 
     return DynamicItemModel(
-      idStr: item.contentType == 'video' 
-          ? item.vid.toString() 
+      idStr: item.contentType == 'video'
+          ? item.vid.toString()
           : item.bid.toString(),
       vid: item.vid,
       bid: item.bid,

@@ -5,7 +5,8 @@ import 'package:piliotto/common/widgets/badge.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/plugin/pl_gallery/index.dart';
 
-void onPreviewImg(String currentUrl, List<String> picList, int initIndex, BuildContext context, String Function(int)? heroTagBuilder) {
+void onPreviewImg(String currentUrl, List<String> picList, int initIndex,
+    BuildContext context, String Function(int)? heroTagBuilder) {
   Navigator.of(context).push(
     HeroDialogRoute<void>(
       builder: (BuildContext context) => InteractiveviewerGallery(
@@ -49,7 +50,8 @@ Widget picWidget(dynamic item, BuildContext context) {
               return child;
             },
             child: GestureDetector(
-              onTap: () => onPreviewImg(picList[i], picList, i, context, heroTag),
+              onTap: () =>
+                  onPreviewImg(picList[i], picList, i, context, heroTag),
               child: NetworkImgLayer(
                 src: pictures[i].src ?? pictures[i].url,
                 width: box.maxWidth,

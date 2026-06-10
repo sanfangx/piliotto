@@ -36,8 +36,7 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
     if (_hotController.scrollController.hasClients &&
         _hotController.scrollController.position.pixels >=
             _hotController.scrollController.position.maxScrollExtent - 200) {
-      if (!_hotController.isLoadingMore &&
-          _hotController.noMore != '没有更多了') {
+      if (!_hotController.isLoadingMore && _hotController.noMore != '没有更多了') {
         _hotController.onLoad();
       }
     }
@@ -122,8 +121,7 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
                         sliver: SliverGrid(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount:
-                                _hotController.crossAxisCount.value,
+                            crossAxisCount: _hotController.crossAxisCount.value,
                             mainAxisSpacing: 16,
                             crossAxisSpacing: 16,
                             childAspectRatio: 3 / 1,
@@ -174,23 +172,23 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
 
   Widget _buildTabBar(BuildContext context) {
     return Obx(() => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(_hotController.tabs.length, (index) {
-          final isSelected = _hotController.currentTabIndex.value == index;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: FilterChip(
-              label: Text(_hotController.tabs[index]['label'] as String),
-              selected: isSelected,
-              onSelected: (_) {
-                _hotController.onTabChanged(index);
-              },
-            ),
-          );
-        }),
-      ),
-    ));
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_hotController.tabs.length, (index) {
+              final isSelected = _hotController.currentTabIndex.value == index;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: FilterChip(
+                  label: Text(_hotController.tabs[index]['label'] as String),
+                  selected: isSelected,
+                  onSelected: (_) {
+                    _hotController.onTabChanged(index);
+                  },
+                ),
+              );
+            }),
+          ),
+        ));
   }
 }

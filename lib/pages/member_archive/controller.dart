@@ -36,7 +36,8 @@ class MemberArchiveController extends GetxController {
       archivesList.clear();
     }
     try {
-      final items = await _videoRepo.getUserVideoList(uid: mid, offset: offset, num: 20);
+      final items =
+          await _videoRepo.getUserVideoList(uid: mid, offset: offset, num: 20);
       if (type == 'init') {
         archivesList.value = items;
       } else {

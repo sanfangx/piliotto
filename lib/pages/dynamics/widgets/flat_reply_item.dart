@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/widgets/badge.dart';
 import 'package:piliotto/common/widgets/markdown_text.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
@@ -60,7 +61,7 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context, colorScheme),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _buildContent(context),
           if (_needsExpandButton) _buildExpandButton(context),
           _buildBottomAction(context),
@@ -100,7 +101,8 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: widget.replyItem.member?.vip != null &&
-                                  widget.replyItem.member!.vip!['vipStatus'] != null &&
+                                  widget.replyItem.member!.vip!['vipStatus'] !=
+                                      null &&
                                   widget.replyItem.member!.vip!['vipStatus'] > 0
                               ? const Color.fromARGB(255, 251, 100, 163)
                               : colorScheme.onSurface,
@@ -108,7 +110,8 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (widget.replyItem.member?.ottohubData?['honour'] != null &&
+                    if (widget.replyItem.member?.ottohubData?['honour'] !=
+                            null &&
                         widget.replyItem.member!.ottohubData!['honour']
                             .toString()
                             .isNotEmpty)
@@ -125,12 +128,13 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                           ),
                           child: Text(
                             widget.replyItem.member!.ottohubData!['honour']
-                                .toString()
-                                .split(',')
-                                .where((e) => e.trim().isNotEmpty)
-                                .firstOrNull ?? '',
+                                    .toString()
+                                    .split(',')
+                                    .where((e) => e.trim().isNotEmpty)
+                                    .firstOrNull ??
+                                '',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: AppFontSize.xs,
                               color: colorScheme.onSecondaryContainer,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -153,7 +157,7 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                 Text(
                   Utils.dateFormat(widget.replyItem.ctime),
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: AppFontSize.sm,
                     color: colorScheme.outline,
                   ),
                 ),
@@ -226,7 +230,7 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
             firstChild: MarkdownText(
               text: widget.replyItem.content?.message ?? '',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppFontSize.base,
                 color: colorScheme.onSurface,
                 height: 1.6,
               ),
@@ -235,7 +239,7 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
             secondChild: MarkdownText(
               text: widget.replyItem.content?.message ?? '',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppFontSize.base,
                 color: colorScheme.onSurface,
                 height: 1.6,
               ),
@@ -272,7 +276,7 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                   color: colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 _isExpanded ? '收起' : '展开',
                 style: TextStyle(
@@ -308,7 +312,7 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                 color: colorScheme.primary,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
           ],
           if (widget.replyItem.cardLabel?.contains('热评') == true) ...[
             Icon(
@@ -353,7 +357,7 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                 size: 16,
                 color: colorScheme.outline,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 '回复',
                 style: TextStyle(
@@ -403,7 +407,8 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete_outline, size: 18, color: colorScheme.error),
+                  Icon(Icons.delete_outline,
+                      size: 18, color: colorScheme.error),
                   const SizedBox(width: 12),
                   Text('删除', style: TextStyle(color: colorScheme.error)),
                 ],
@@ -435,7 +440,8 @@ class _FlatReplyItemState extends State<FlatReplyItem> {
                       onPressed: () => Navigator.of(ctx).pop(false),
                       child: Text(
                         '取消',
-                        style: TextStyle(color: Theme.of(ctx).colorScheme.outline),
+                        style:
+                            TextStyle(color: Theme.of(ctx).colorScheme.outline),
                       ),
                     ),
                     TextButton(

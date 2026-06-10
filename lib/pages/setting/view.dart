@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/pages/setting/index.dart';
 
 class SettingPage extends StatelessWidget {
@@ -10,7 +11,8 @@ class SettingPage extends StatelessWidget {
     final SettingController settingController = Get.put(SettingController());
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    Widget buildSettingItem(IconData icon, String title, String subtitle, VoidCallback onTap) {
+    Widget buildSettingItem(
+        IconData icon, String title, String subtitle, VoidCallback onTap) {
       return ListTile(
         onTap: onTap,
         leading: Icon(
@@ -24,16 +26,16 @@ class SettingPage extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: AppFontSize.lg,
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               subtitle,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppFontSize.sm,
                 color: colorScheme.outline,
               ),
             ),
@@ -87,6 +89,17 @@ class SettingPage extends StatelessWidget {
             '关于',
             '应用版本和相关信息',
             () => Get.toNamed('/about'),
+          ),
+          Obx(
+            () => Visibility(
+              visible: settingController.isDeveloperMode.value,
+              child: buildSettingItem(
+                Icons.developer_mode_outlined,
+                '开发者选项',
+                '开发者调试功能',
+                () => Get.toNamed('/developer'),
+              ),
+            ),
           ),
         ],
       ),

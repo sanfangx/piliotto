@@ -4,6 +4,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/pages/dynamics/detail/index.dart';
 import 'package:piliotto/pages/dynamics/widgets/author_panel.dart';
 import 'package:piliotto/pages/dynamics/widgets/flat_reply_item.dart';
@@ -292,11 +293,11 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                       color: colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.base),
                   Text(
                     '加载中...',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: AppFontSize.base,
                       color: colorScheme.outline,
                     ),
                   ),
@@ -305,7 +306,7 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
             : Text(
                 _dynamicDetailController.noMore.value,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppFontSize.sm,
                   color: colorScheme.outline,
                 ),
               ),

@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 
 import 'package:piliotto/pages/danmaku/view.dart';
@@ -384,7 +385,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
                 () => TabBar(
                   padding: EdgeInsets.zero,
                   controller: vdCtr.tabCtr,
-                  labelStyle: const TextStyle(fontSize: 13),
+                  labelStyle: const TextStyle(fontSize: AppFontSize.sm),
                   labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
                   dividerColor: Colors.transparent,
                   tabs:
@@ -410,7 +411,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
                             color: Colors.grey,
                           ),
                         )),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     SizedBox(
                       height: 32,
                       child: TextButton(

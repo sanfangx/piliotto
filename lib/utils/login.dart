@@ -34,7 +34,6 @@ class LoginUtils {
     }
   }
 
-  // 用于 WebView 登录确认（B站登录方式已废弃，Ottohub 使用自己的登录）
   static Future confirmLogin(String? url, WebViewController? controller) async {
     SmartDialog.showToast('Ottohub 请使用应用内登录功能');
     if (controller != null) {

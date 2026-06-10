@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/pages/home/controller.dart';
 import 'package:piliotto/utils/storage.dart';
@@ -73,27 +74,27 @@ class HomeAppBar extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.base),
                             Icon(
                               CupertinoIcons.search,
                               size: 18,
                               color: Theme.of(context).colorScheme.outline,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.sm),
                             Expanded(
                               child: Obx(() => Text(
                                     homeController.defaultSearch.value.isEmpty
                                         ? '搜索视频'
                                         : homeController.defaultSearch.value,
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: AppFontSize.base,
                                       color:
                                           Theme.of(context).colorScheme.outline,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   )),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.base),
                           ],
                         ),
                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 
 class SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabBar tabBar;
@@ -46,7 +47,7 @@ class ErrorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -73,18 +74,20 @@ class ErrorPage extends StatelessWidget {
                   children: [
                     Icon(Icons.error_outline,
                         size: 64, color: theme.colorScheme.error),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     Text('加载失败',
                         style: TextStyle(
-                            fontSize: 18, color: theme.colorScheme.onSurface)),
+                            fontSize: AppFontSize.xl,
+                            color: theme.colorScheme.onSurface)),
                     if (errorMessage != null && errorMessage!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: Text(
                           errorMessage!,
                           style: TextStyle(
-                              fontSize: 14, color: theme.colorScheme.outline),
+                              fontSize: AppFontSize.base,
+                              color: theme.colorScheme.outline),
                           textAlign: TextAlign.center,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
@@ -92,7 +95,7 @@ class ErrorPage extends StatelessWidget {
                       ),
                     ],
                     if (onRetry != null) ...[
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.xxl),
                       FilledButton.icon(
                         onPressed: onRetry,
                         icon: const Icon(Icons.refresh),
@@ -121,7 +124,7 @@ class LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: Column(

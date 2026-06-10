@@ -84,7 +84,7 @@ class VideoDetailController extends GetxController
   PersistentBottomSheetController? replyReplyBottomSheetCtr;
 
   late bool enableRelatedVideo;
-  
+
   // 半屏默认底部按钮列表
   static const List<BottomControlType> _defaultHalfScreenBottomList = [
     BottomControlType.playOrPause,
@@ -93,7 +93,7 @@ class VideoDetailController extends GetxController
     BottomControlType.fit,
     BottomControlType.fullscreen,
   ];
-  
+
   // 全屏默认底部按钮列表
   static const List<BottomControlType> _defaultFullScreenBottomList = [
     BottomControlType.playOrPause,
@@ -104,16 +104,16 @@ class VideoDetailController extends GetxController
     BottomControlType.speed,
     BottomControlType.fullscreen,
   ];
-  
+
   // 当前使用的底部按钮列表
   RxList<BottomControlType> bottomList = <BottomControlType>[].obs;
-  
+
   // 半屏底部按钮列表
   late RxList<BottomControlType> halfScreenBottomList;
-  
+
   // 全屏底部按钮列表
   late RxList<BottomControlType> fullScreenBottomList;
-  
+
   RxDouble sheetHeight = 0.0.obs;
   ScrollController? replyScrollController;
 
@@ -168,22 +168,24 @@ class VideoDetailController extends GetxController
 
   /// 初始化底部按钮列表（从本地存储读取或使用默认值）
   void _initBottomLists() {
-    final List<String>? halfScreenCodes = 
+    final List<String>? halfScreenCodes =
         videoStorage.get(VideoBoxKey.halfScreenBottomList)?.cast<String>();
-    final List<String>? fullScreenCodes = 
+    final List<String>? fullScreenCodes =
         videoStorage.get(VideoBoxKey.fullScreenBottomList)?.cast<String>();
-    
+
     final halfScreen = BottomControlTypeExtension.fromCodeList(halfScreenCodes);
     final fullScreen = BottomControlTypeExtension.fromCodeList(fullScreenCodes);
-    
-    halfScreenBottomList = (halfScreen.isEmpty 
-        ? List<BottomControlType>.from(_defaultHalfScreenBottomList) 
-        : halfScreen).obs;
-    
-    fullScreenBottomList = (fullScreen.isEmpty 
-        ? List<BottomControlType>.from(_defaultFullScreenBottomList) 
-        : fullScreen).obs;
-    
+
+    halfScreenBottomList = (halfScreen.isEmpty
+            ? List<BottomControlType>.from(_defaultHalfScreenBottomList)
+            : halfScreen)
+        .obs;
+
+    fullScreenBottomList = (fullScreen.isEmpty
+            ? List<BottomControlType>.from(_defaultFullScreenBottomList)
+            : fullScreen)
+        .obs;
+
     bottomList.value = List<BottomControlType>.from(halfScreenBottomList);
   }
 
@@ -209,7 +211,8 @@ class VideoDetailController extends GetxController
     bottomList.value = List<BottomControlType>.from(fullScreenBottomList);
   }
 
-  void showReplyReplyPanel(int oid, int fRpid, dynamic firstFloor, dynamic currentReply, bool loadMore) {
+  void showReplyReplyPanel(int oid, int fRpid, dynamic firstFloor,
+      dynamic currentReply, bool loadMore) {
     // 判断是否为宽屏模式
     final bool isWideScreen = Get.size.width > 768;
     // 宽屏模式使用右侧内容区域的 Scaffold，窄屏使用主 Scaffold
@@ -378,7 +381,13 @@ class VideoDetailController extends GetxController
     DanmakuSendSheet.show(
       vid: vid,
       currentTime: plPlayerController.position.value.inSeconds,
-      onSend: ({required vid, required text, required time, required mode, required color, required fontSize}) {
+      onSend: (
+          {required vid,
+          required text,
+          required time,
+          required mode,
+          required color,
+          required fontSize}) {
         return _danmakuRepo.sendDanmaku(
           vid: vid,
           text: text,

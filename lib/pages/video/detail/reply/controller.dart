@@ -96,7 +96,8 @@ class VideoReplyController extends GetxController {
   Future<List<ReplyItemModel>> queryChildComments(int parentVcid) async {
     try {
       final logger = getLogger();
-      logger.d('开始获取二级评论，vid: $vid, parentVcid: $parentVcid, offset: 0, num: $ps');
+      logger.d(
+          '开始获取二级评论，vid: $vid, parentVcid: $parentVcid, offset: 0, num: $ps');
 
       final result = await _commentRepo.getVideoComments(
         vid: vid,

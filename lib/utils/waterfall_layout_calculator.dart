@@ -102,7 +102,8 @@ class WaterfallLayoutCalculator {
     if (!limitWidth) {
       return autoCount;
     }
-    return (fixedCrossAxisCount ?? autoCount).clamp(minCrossAxisCount, autoCount);
+    return (fixedCrossAxisCount ?? autoCount)
+        .clamp(minCrossAxisCount, autoCount);
   }
 }
 
@@ -137,6 +138,7 @@ class WaterfallLayoutConfig {
     final effectiveScreenWidth =
         screenWidth > maxContentWidth ? maxContentWidth : screenWidth;
     final gridWidth = calculateGridWidth(crossAxisSpacing);
-    return ((effectiveScreenWidth - gridWidth) / 2).clamp(12.0, double.infinity);
+    return ((effectiveScreenWidth - gridWidth) / 2)
+        .clamp(12.0, double.infinity);
   }
 }

@@ -5,7 +5,8 @@ import '../models/member/archive.dart';
 import 'package:piliotto/repositories/base_repository.dart';
 import 'package:piliotto/repositories/i_video_repository.dart';
 
-class OttohubVideoRepository extends BaseRepository implements IVideoRepository {
+class OttohubVideoRepository extends BaseRepository
+    implements IVideoRepository {
   @override
   Future<VideoListResponse> getRandomVideos({int num = 20}) {
     return withCache(

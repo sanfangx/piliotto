@@ -25,7 +25,8 @@ class VideoReplyReplyController extends GetxController {
     currentPage = 0;
   }
 
-  Future<void> queryReplyList({String type = 'init', dynamic currentReply}) async {
+  Future<void> queryReplyList(
+      {String type = 'init', dynamic currentReply}) async {
     if (type == 'init') {
       currentPage = 0;
     }
@@ -35,7 +36,8 @@ class VideoReplyReplyController extends GetxController {
     isLoadingMore = true;
     try {
       final logger = getLogger();
-      logger.d('开始获取二级评论列表，vid: $vid, parentVcid: $parentVcid, offset: ${currentPage * ps}, num: $ps');
+      logger.d(
+          '开始获取二级评论列表，vid: $vid, parentVcid: $parentVcid, offset: ${currentPage * ps}, num: $ps');
 
       final result = await _commentRepo.getVideoComments(
         vid: vid,

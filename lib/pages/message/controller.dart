@@ -66,7 +66,9 @@ class MessageController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final myUid = currentUser.value?.uid ?? GStrorage.userInfo.get('userInfoCache')?.mid ?? 0;
+      final myUid = currentUser.value?.uid ??
+          GStrorage.userInfo.get('userInfoCache')?.mid ??
+          0;
 
       final allFriends = await _messageRepo.getMergedFriendList(
         uid: myUid,

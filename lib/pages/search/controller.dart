@@ -1,53 +1,39 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/pages/search/base_search_controller.dart';
 import 'package:piliotto/repositories/i_video_repository.dart';
 import 'package:piliotto/ottohub/api/models/video.dart';
 import 'package:piliotto/ottohub/api/services/api_service.dart';
-import 'package:piliotto/utils/responsive_util.dart';
 import 'package:piliotto/services/loggeer.dart';
 
 final _logger = getLogger();
 
-class VideoSearchController extends GetxController {
+/// 视频搜索控制器
+/// 
+/// 继承自 [BaseSearchController]，实现视频搜索的具体逻辑。
+/// 
+/// 特殊功能：
+/// - 支持 OV号码快速跳转（如 OV123 直接跳转到视频详情）
+/// 
+/// 使用示例：
+/// ```dart
+/// // 在页面中注册控制器
+/// final controller = Get.put(VideoSearchController());
+/// 
+/// // 执行搜索
+/// controller.search('关键词');
+/// ```
+class VideoSearchController extends BaseSearchController<Video> {
   final IVideoRepository _videoRepo = Get.find<IVideoRepository>();
-  final ScrollController scrollController = ScrollController();
-  final TextEditingController searchInputController = TextEditingController();
-  final FocusNode searchFocusNode = FocusNode();
 
-  final int _count = 20;
-  int _currentPage = 1;
-  RxList<Video> videoList = <Video>[].obs;
-  RxBool isLoading = false.obs;
-  RxBool isLoadingMore = false.obs;
-  RxBool hasMore = true.obs;
-  RxString currentKeyword = ''.obs;
-  RxInt crossAxisCount = 1.obs;
-  RxString errorMessage = ''.obs;
-  RxBool hasError = false.obs;
+  VideoSearchController({super.pageSize});
 
-  @override
-  void onInit() {
-    super.onInit();
-    updateCrossAxisCount();
-  }
-
-  void updateCrossAxisCount() {
-    try {
-      crossAxisCount.value = ResponsiveUtil.calculateCrossAxisCount(
-        baseCount: 1,
-        minCount: 1,
-        maxCount: 3,
-      );
-    } catch (e) {
-      crossAxisCount.value = 1;
-    }
-  }
-
+  /// 检查是否为 OV号码格式
   bool _isOVNumber(String input) {
     final RegExp ovPattern = RegExp(r'^OV(\d+)$', caseSensitive: false);
     return ovPattern.hasMatch(input.trim());
   }
 
+  /// 从 OV号码中提取视频ID
   int? _extractVidFromOV(String input) {
     final RegExp ovPattern = RegExp(r'^OV(\d+)$', caseSensitive: false);
     final match = ovPattern.firstMatch(input.trim());
@@ -57,108 +43,51 @@ class VideoSearchController extends GetxController {
     return null;
   }
 
-  void _clearError() {
-    errorMessage.value = '';
-    hasError.value = false;
-  }
-
-  void _setError(String message) {
-    errorMessage.value = message;
-    hasError.value = true;
-  }
-
-  Future<void> searchVideos(String keyword, {bool isLoadMore = false}) async {
-    if (keyword.isEmpty) return;
-
-    final String trimmedKeyword = keyword.trim();
-
-    if (_isOVNumber(trimmedKeyword)) {
-      final int? vid = _extractVidFromOV(trimmedKeyword);
+  @override
+  Future<bool> onBeforeSearch(String keyword) async {
+    // 处理 OV号码快速跳转
+    if (_isOVNumber(keyword)) {
+      final int? vid = _extractVidFromOV(keyword);
       if (vid != null) {
         Get.toNamed('/video?vid=$vid', arguments: {
           'heroTag': 'ov_$vid',
         });
-        return;
+        return true;
       }
     }
+    return false;
+  }
 
-    if (!isLoadMore) {
-      isLoading.value = true;
-      _currentPage = 1;
-      currentKeyword.value = keyword;
-      _clearError();
-    } else {
-      isLoadingMore.value = true;
-    }
+  @override
+  Future<List<Video>> performSearch(String keyword, int offset, int count) async {
+    final response = await _videoRepo.searchVideos(
+      searchTerm: keyword,
+      offset: offset,
+      num: count,
+    );
+    return response.videoList;
+  }
 
-    try {
-      int offset = (_currentPage - 1) * _count;
-      final response = await _videoRepo.searchVideos(
-        searchTerm: keyword,
-        offset: offset,
-        num: _count,
-      );
-
-      final List<Video> videos = response.videoList;
-
-      if (isLoadMore) {
-        videoList.addAll(videos);
-      } else {
-        videoList.value = videos;
-      }
-
-      hasMore.value = videos.length >= _count;
-      _currentPage++;
-    } on ApiException catch (e) {
-      _logger.w('搜索失败: ${e.message}');
+  @override
+  void onSearchError(dynamic error, bool isLoadMore) {
+    if (error is ApiException) {
+      _logger.w('搜索失败: ${error.message}');
       if (!isLoadMore) {
-        _setError(e.message);
-        videoList.clear();
+        errorMessage.value = error.message;
+        hasError.value = true;
+        resultList.clear();
       }
-    } catch (e) {
-      _logger.w('搜索失败: $e');
-      if (!isLoadMore) {
-        _setError('搜索失败，请稍后重试');
-        videoList.clear();
-      }
-    } finally {
-      isLoading.value = false;
-      isLoadingMore.value = false;
-    }
-  }
-
-  Future<void> onLoad() async {
-    if (isLoadingMore.value || !hasMore.value) return;
-    await searchVideos(currentKeyword.value, isLoadMore: true);
-  }
-
-  Future<void> onRefresh() async {
-    if (currentKeyword.value.isNotEmpty) {
-      await searchVideos(currentKeyword.value);
-    }
-  }
-
-  void clearSearchResult() {
-    videoList.clear();
-    currentKeyword.value = '';
-    searchInputController.clear();
-    _clearError();
-  }
-
-  void retrySearch() {
-    if (currentKeyword.value.isNotEmpty) {
-      searchVideos(currentKeyword.value);
-    }
-  }
-
-  void animateToTop() async {
-    if (!scrollController.hasClients) return;
-    if (scrollController.offset >=
-        MediaQuery.of(Get.context!).size.height * 5) {
-      scrollController.jumpTo(0);
     } else {
-      await scrollController.animateTo(0,
-          duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+      _logger.w('搜索失败: $error');
+      super.onSearchError(error, isLoadMore);
     }
   }
+
+  /// 向后兼容：使用 searchVideos 方法
+  Future<void> searchVideos(String keyword, {bool isLoadMore = false}) async {
+    await search(keyword, isLoadMore: isLoadMore);
+  }
+
+  /// 向后兼容：获取视频列表
+  RxList<Video> get videoList => resultList;
 }

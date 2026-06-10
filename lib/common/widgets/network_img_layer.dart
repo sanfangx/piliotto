@@ -42,7 +42,8 @@ class NetworkImgLayer extends StatelessWidget {
     if (src!.contains('ottohub.cn')) {
       imageUrl = src!.startsWith('//') ? 'https:${src!}' : src!;
     } else {
-      imageUrl = '${src!.startsWith('//') ? 'https:${src!}' : src!}@${quality ?? defaultImgQuality}q.webp';
+      imageUrl =
+          '${src!.startsWith('//') ? 'https:${src!}' : src!}@${quality ?? defaultImgQuality}q.webp';
     }
     int? memCacheWidth, memCacheHeight;
     double aspectRatio = (width / height).toDouble();

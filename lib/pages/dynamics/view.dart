@@ -2,7 +2,10 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/skeleton/dynamic_card.dart';
+import 'package:piliotto/common/widgets/loading_indicator.dart';
+import 'package:piliotto/common/widgets/new_dynamics_banner.dart';
 import 'package:piliotto/common/widgets/no_data.dart';
 import 'package:piliotto/utils/feed_back.dart';
 import 'package:piliotto/utils/responsive_util.dart';
@@ -11,6 +14,9 @@ import 'controller.dart';
 import 'widgets/dynamic_panel.dart';
 
 class DynamicsPage extends StatefulWidget {
+  /// Tab 标签列表
+  static const List<String> tabs = ['latest', 'popular'];
+
   const DynamicsPage({super.key});
 
   @override
@@ -19,7 +25,7 @@ class DynamicsPage extends StatefulWidget {
 
 class _DynamicsPageState extends State<DynamicsPage>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-  final DynamicsController _dynamicsController = Get.put(DynamicsController());
+  late DynamicsController _dynamicsController;
   late TabController _tabController;
   int _previousTabIndex = 0;
 
@@ -29,6 +35,7 @@ class _DynamicsPageState extends State<DynamicsPage>
   @override
   void initState() {
     super.initState();
+    _dynamicsController = Get.put(DynamicsController());
     _tabController = TabController(length: 2, vsync: this);
     _dynamicsController.queryFollowDynamic();
   }
@@ -51,8 +58,7 @@ class _DynamicsPageState extends State<DynamicsPage>
     }
     _previousTabIndex = index;
     _tabController.animateTo(index);
-    final tabs = ['latest', 'popular'];
-    _dynamicsController.onTabChanged(tabs[index]);
+    _dynamicsController.onTabChanged(DynamicsPage.tabs[index]);
   }
 
   @override
@@ -68,7 +74,7 @@ class _DynamicsPageState extends State<DynamicsPage>
         children: [
           SizedBox(height: top + 6),
           _buildHeader(theme, colorScheme, isWideScreen),
-          const SizedBox(height: 4),
+          SizedBox(height: AppSpacing.xs),
           SizedBox(
             width: double.infinity,
             height: 42,
@@ -89,17 +95,17 @@ class _DynamicsPageState extends State<DynamicsPage>
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.sm),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
                 _TabPage(
-                  tab: 'latest',
+                  tab: DynamicsPage.tabs[0],
                   dynamicsController: _dynamicsController,
                 ),
                 _TabPage(
-                  tab: 'popular',
+                  tab: DynamicsPage.tabs[1],
                   dynamicsController: _dynamicsController,
                 ),
               ],
@@ -162,14 +168,17 @@ class _DynamicsPageState extends State<DynamicsPage>
       builder: (context) => AlertDialog(
         title: const Text('瀑布流设置'),
         content: AnimatedSize(
-          duration: const Duration(milliseconds: 200),
+          duration: AppDurations.normal,
           curve: Curves.easeInOut,
           alignment: Alignment.topCenter,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              final currentConfig = _dynamicsController.getLayoutConfig(screenWidth);
+              final currentConfig =
+                  _dynamicsController.getLayoutConfig(screenWidth);
               final autoCrossAxisCount = currentConfig.autoCrossAxisCount;
-              final autoItemWidth = (screenWidth - (autoCrossAxisCount - 1) * 12.0) / autoCrossAxisCount;
+              final autoItemWidth =
+                  (screenWidth - (autoCrossAxisCount - 1) * 12.0) /
+                      autoCrossAxisCount;
               final limitWidth = settings.limitWidth;
               final useCustomWidth = settings.useCustomItemWidth;
               final customWidth = settings.customItemWidth;
@@ -211,7 +220,7 @@ class _DynamicsPageState extends State<DynamicsPage>
                     },
                   ),
                   if (useCustomWidth) ...[
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
                         const Text('卡片宽度: '),
@@ -236,15 +245,15 @@ class _DynamicsPageState extends State<DynamicsPage>
                     '当前屏幕自动计算列数: $autoCrossAxisCount',
                     style: TextStyle(
                       color: colorScheme.outline,
-                      fontSize: 12,
+                      fontSize: AppFontSize.sm,
                     ),
                   ),
                   if (limitWidth) ...[
-                    const SizedBox(height: 12),
+                    SizedBox(height: AppSpacing.base),
                     Row(
                       children: [
                         const Text('瀑布流列数: '),
-                        const SizedBox(width: 8),
+                        SizedBox(width: AppSpacing.sm),
                         DropdownButton<int>(
                           value: effectiveCrossAxisCount,
                           items: columnItems,
@@ -311,8 +320,7 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
       if (cachedList.isEmpty && !hasLoaded) {
         if (widget.dynamicsController.tabLoadingStates[widget.tab]!.value &&
             isCurrentTab) {
-          return _buildSkeletonList(
-              isWideScreen, screenWidth, layoutMode);
+          return _buildSkeletonList(isWideScreen, screenWidth, layoutMode);
         } else {
           return NoData(
             onRefresh: () => widget.dynamicsController.onRefresh(),
@@ -326,8 +334,7 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
               notification.metrics.pixels >=
                   notification.metrics.maxScrollExtent - 200) {
             EasyThrottle.throttle(
-                'queryFollowDynamic_${widget.tab}', const Duration(seconds: 1),
-                () {
+                'queryFollowDynamic_${widget.tab}', AppDurations.throttle, () {
               widget.dynamicsController.queryFollowDynamic(type: 'onLoad');
             });
           }
@@ -368,7 +375,7 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
     bool isWideScreen,
     double screenWidth,
   ) {
-    const contentMaxWidth = 600.0;
+    final contentMaxWidth = AppBreakpoints.mobile;
     final scrollController =
         widget.dynamicsController.tabScrollControllers[widget.tab];
 
@@ -383,11 +390,16 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
               colorScheme, isWideScreen, contentMaxWidth);
         }
         if (index == cachedList.length) {
-          return _buildLoadingIndicator(colorScheme);
+          return Obx(() => LoadingIndicator(
+                isLoading: widget
+                    .dynamicsController.tabLoadingStates[widget.tab]!.value,
+                endText:
+                    widget.dynamicsController.hasMore.value ? null : '没有更多了',
+              ));
         }
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          margin: AppPaddings.listItemVertical,
           width: isWideScreen ? contentMaxWidth : null,
           child: DynamicPanel(
             item: cachedList[index - 1],
@@ -451,7 +463,7 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
     ColorScheme colorScheme,
     double screenWidth,
   ) {
-    const crossAxisSpacing = 12.0;
+    final crossAxisSpacing = AppSpacing.base;
     final layoutConfig = widget.dynamicsController.getLayoutConfig(screenWidth);
     final settings = widget.dynamicsController.layoutSettings;
 
@@ -469,7 +481,12 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
       childCount: cachedList.length + 1,
       itemBuilder: (context, index) {
         if (index == cachedList.length) {
-          return _buildLoadingIndicator(colorScheme);
+          return Obx(() => LoadingIndicator(
+                isLoading: widget
+                    .dynamicsController.tabLoadingStates[widget.tab]!.value,
+                endText:
+                    widget.dynamicsController.hasMore.value ? null : '没有更多了',
+              ));
         }
         return DynamicPanel(
           item: cachedList[index],
@@ -530,38 +547,10 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
         return const SizedBox.shrink();
       }
 
-      return Container(
+      return NewDynamicsBanner(
+        count: count,
+        onTap: () => widget.dynamicsController.loadNewDynamics(),
         margin: const EdgeInsets.only(bottom: 12),
-        child: Material(
-          color: colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
-            onTap: () => widget.dynamicsController.loadNewDynamics(),
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.arrow_upward_rounded,
-                    size: 18,
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '$count 条新动态',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       );
     });
   }
@@ -576,7 +565,7 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildCenteredSkeletonList(bool isWideScreen, double screenWidth) {
-    const contentMaxWidth = 600.0;
+    final contentMaxWidth = AppBreakpoints.mobile;
 
     return ListView.builder(
       padding:
@@ -590,7 +579,7 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildWaterfallSkeletonList(double screenWidth) {
-    const crossAxisSpacing = 12.0;
+    final crossAxisSpacing = AppSpacing.base;
     final layoutConfig = widget.dynamicsController.getLayoutConfig(screenWidth);
     final settings = widget.dynamicsController.layoutSettings;
 
@@ -637,42 +626,5 @@ class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
       right: 12,
       bottom: 80,
     );
-  }
-
-  Widget _buildLoadingIndicator(ColorScheme colorScheme) {
-    return Obx(() => Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Center(
-            child: widget.dynamicsController.tabLoadingStates[widget.tab]!.value
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '加载中...',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.outline,
-                        ),
-                      ),
-                    ],
-                  )
-                : Text(
-                    widget.dynamicsController.hasMore.value ? '' : '没有更多了',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: colorScheme.outline,
-                    ),
-                  ),
-          ),
-        ));
   }
 }

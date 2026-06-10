@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 
 /// 用户资料头部组件
@@ -11,6 +12,9 @@ import 'package:piliotto/common/widgets/network_img_layer.dart';
 /// - 关注数和粉丝数
 /// - 操作按钮（关注、发消息等）
 class UserProfileHeader extends StatelessWidget {
+  /// 头像图标大小比例
+  static const double _avatarIconSizeRatio = 0.57;
+
   /// 封面图片 URL
   final String? coverUrl;
 
@@ -99,14 +103,14 @@ class UserProfileHeader extends StatelessWidget {
               imageUrl:
                   coverUrl!.startsWith('//') ? 'https:$coverUrl' : coverUrl!,
               fit: BoxFit.cover,
-              fadeInDuration: const Duration(milliseconds: 300),
-              fadeOutDuration: const Duration(milliseconds: 120),
+              fadeInDuration: AppDurations.slow,
+              fadeOutDuration: AppDurations.fast,
               placeholder: (context, url) => const SizedBox.shrink(),
               errorWidget: (context, url, error) => const SizedBox.shrink(),
             ),
           Container(
             color: hasCover
-                ? Colors.black.withValues(alpha: 100 / 255)
+                ? Colors.black.withValues(alpha: AppOpacity.heavy)
                 : Colors.transparent,
           ),
           SafeArea(
@@ -122,7 +126,7 @@ class UserProfileHeader extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildAvatar(theme, hasCover),
-                          const SizedBox(width: 16),
+                          SizedBox(width: AppSpacing.lg),
                           Expanded(child: _buildUserDetails(theme, hasCover)),
                         ],
                       ),
@@ -157,7 +161,8 @@ class UserProfileHeader extends StatelessWidget {
             radius: avatarSize / 2,
             backgroundColor: theme.colorScheme.surface,
             child: Icon(Icons.person,
-                size: avatarSize * 0.57, color: theme.colorScheme.primary),
+                size: avatarSize * _avatarIconSizeRatio,
+                color: theme.colorScheme.primary),
           );
 
     return GestureDetector(
@@ -172,8 +177,9 @@ class UserProfileHeader extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: hasCover
-                  ? Colors.black.withValues(alpha: 80 / 255)
-                  : theme.colorScheme.shadow.withValues(alpha: 50 / 255),
+                  ? Colors.black.withValues(alpha: AppOpacity.medium)
+                  : theme.colorScheme.shadow
+                      .withValues(alpha: AppOpacity.light),
               blurRadius: 10,
               spreadRadius: 2,
             ),
@@ -196,25 +202,25 @@ class UserProfileHeader extends StatelessWidget {
         Text(
           userName ?? '',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: AppFontSize.xxl,
             fontWeight: FontWeight.bold,
             color: textColor,
           ),
         ),
         if (userId != null) ...[
-          const SizedBox(height: 4),
+          SizedBox(height: AppSpacing.xs),
           Text('UID: $userId',
               style: TextStyle(fontSize: 13, color: subTextColor)),
         ],
         if (followingCount != null || followerCount != null) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               if (followingCount != null)
                 _buildStatItem('关注', followingCount!, textColor, subTextColor,
                     onFollowingTap),
               if (followingCount != null && followerCount != null)
-                const SizedBox(width: 16),
+                SizedBox(width: AppSpacing.lg),
               if (followerCount != null)
                 _buildStatItem('粉丝', followerCount!, textColor, subTextColor,
                     onFollowerTap),
@@ -222,7 +228,7 @@ class UserProfileHeader extends StatelessWidget {
           ),
         ],
         if (extraContent != null) ...[
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.base),
           extraContent!,
         ],
       ],
@@ -238,10 +244,11 @@ class UserProfileHeader extends StatelessWidget {
         children: [
           Text(value,
               style: TextStyle(
-                  fontSize: 15,
+                  fontSize: AppFontSize.base + 1,
                   fontWeight: FontWeight.bold,
                   color: valueColor)),
-          Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
+          Text(label,
+              style: TextStyle(fontSize: AppFontSize.sm, color: labelColor)),
         ],
       ),
     );
@@ -252,7 +259,8 @@ class UserProfileHeader extends StatelessWidget {
     final textColor = hasCover ? Colors.white : theme.colorScheme.onSurface;
     final subTextColor =
         hasCover ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
-    final isNarrowScreen = MediaQuery.of(context).size.width < 600;
+    final isNarrowScreen =
+        MediaQuery.of(context).size.width < AppBreakpoints.mobile;
 
     if (isNarrowScreen) {
       return FilledButton(
@@ -268,7 +276,7 @@ class UserProfileHeader extends StatelessWidget {
           onPressed: onRelationAction,
           child: Text(relationButtonText ?? '关注'),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.sm),
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             foregroundColor: textColor,

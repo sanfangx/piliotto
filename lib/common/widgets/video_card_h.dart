@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
+import 'package:piliotto/common/constants/app_styles.dart';
+import 'package:piliotto/common/models/video_data.dart';
+import 'package:piliotto/common/models/video_data_adapter.dart';
 import 'package:piliotto/utils/feed_back.dart';
 import 'package:piliotto/utils/image_save.dart';
 
-import 'package:piliotto/ottohub/api/models/video.dart';
 import 'package:piliotto/repositories/i_user_repository.dart';
 import '../../utils/utils.dart';
 import '../constants.dart';
 import 'badge.dart';
 import 'network_img_layer.dart';
+import 'rank_badge.dart';
 import 'stat/danmu.dart';
 import 'stat/view.dart';
 
@@ -37,78 +40,23 @@ class VideoCardH extends StatelessWidget {
   final bool showCharge;
   final int? rankIndex;
 
-  int get _videoId {
-    if (videoItem is Video) {
-      return videoItem.vid;
-    }
-    return videoItem.vid ?? videoItem.aid ?? 0;
-  }
-
-  String get _coverUrl {
-    if (videoItem is Video) {
-      return videoItem.coverUrl ?? '';
-    }
-    return videoItem.pic ?? videoItem.coverUrl ?? '';
-  }
-
-  String get _title {
-    if (videoItem is Video) {
-      return videoItem.title ?? '';
-    }
-    return videoItem.title ?? '';
-  }
-
-  String get _ownerName {
-    if (videoItem is Video) {
-      return videoItem.username ?? '';
-    }
-    return videoItem.owner?.name ?? videoItem.author ?? '';
-  }
-
-  int get _viewCount {
-    if (videoItem is Video) {
-      return videoItem.viewCount ?? 0;
-    }
-    return videoItem.stat?.view ?? videoItem.play ?? 0;
-  }
-
-  int? get _danmakuCount {
-    if (videoItem is Video) {
-      return null;
-    }
-    return videoItem.stat?.danmaku ?? videoItem.videoReview ?? 0;
-  }
-
-  int get _duration {
-    if (videoItem is Video) {
-      return videoItem.duration ?? 0;
-    }
-    final dur = videoItem.duration ?? videoItem.length;
-    if (dur is int) return dur;
-    if (dur is String) return int.tryParse(dur) ?? 0;
-    return 0;
-  }
-
-  int? get _pubdate {
-    if (videoItem is Video) {
-      final time = videoItem.time;
-      if (time is int) return time;
-      if (time is String) {
-        final dt = DateTime.tryParse(time);
-        return dt != null ? dt.millisecondsSinceEpoch ~/ 1000 : null;
-      }
-      return null;
-    }
-    return videoItem.pubdate ?? videoItem.created;
+  /// 获取类型安全的视频数据
+  VideoData get _videoData {
+    final data = toVideoData(videoItem);
+    if (data != null) return data;
+    // 如果无法转换，返回一个默认实现（这种情况不应该发生）
+    throw ArgumentError(
+        'Unsupported video item type: ${videoItem.runtimeType}');
   }
 
   @override
   Widget build(BuildContext context) {
-    final String heroTag = Utils.makeHeroTag(_videoId);
+    final videoData = _videoData;
+    final String heroTag = Utils.makeHeroTag(videoData.videoId);
     return InkWell(
       onTap: () async {
-        Get.toNamed('/video?vid=$_videoId', arguments: {
-          'pic': _coverUrl,
+        Get.toNamed('/video?vid=${videoData.videoId}', arguments: {
+          'pic': videoData.coverUrl,
           'heroTag': heroTag,
         });
       },
@@ -141,7 +89,7 @@ class VideoCardH extends StatelessWidget {
                             Hero(
                               tag: heroTag,
                               child: NetworkImgLayer(
-                                src: _coverUrl,
+                                src: videoData.coverUrl,
                                 width: maxWidth,
                                 height: maxHeight,
                               ),
@@ -150,58 +98,18 @@ class VideoCardH extends StatelessWidget {
                               Positioned(
                                 left: 0,
                                 top: 0,
-                                child: Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: rankIndex == 1
-                                        ? const Color(0xFFFFD700)
-                                        : rankIndex == 2
-                                            ? const Color(0xFFC0C0C0)
-                                            : const Color(0xFFCD7F32),
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      bottomRight: Radius.circular(8),
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '$rankIndex',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                                child: RankBadge(rank: rankIndex!),
                               ),
                             if (rankIndex != null && rankIndex! > 3)
                               Positioned(
                                 left: 0,
                                 top: 0,
-                                child: Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black54,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      bottomRight: Radius.circular(8),
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '$rankIndex',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
+                                child: RankBadge(
+                                    rank: rankIndex!, fontSize: AppFontSize.sm),
                               ),
-                            if (_duration > 0)
+                            if (videoData.duration > 0)
                               PBadge(
-                                text: Utils.timeFormat(_duration),
+                                text: Utils.timeFormat(videoData.duration),
                                 right: 6.0,
                                 bottom: 6.0,
                                 type: 'gray',
@@ -218,7 +126,7 @@ class VideoCardH extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _title,
+                            videoData.title,
                             textAlign: TextAlign.start,
                             style: const TextStyle(
                               fontWeight: FontWeight.w500,
@@ -227,9 +135,9 @@ class VideoCardH extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const Spacer(),
-                          if (showPubdate && _pubdate != null)
+                          if (showPubdate && videoData.pubdate != null)
                             Text(
-                              Utils.dateFormat(_pubdate!),
+                              Utils.dateFormat(videoData.pubdate!),
                               style: TextStyle(
                                   fontSize: 11,
                                   color: Theme.of(context).colorScheme.outline),
@@ -238,7 +146,7 @@ class VideoCardH extends StatelessWidget {
                             Row(
                               children: [
                                 Text(
-                                  _ownerName,
+                                  videoData.ownerName,
                                   style: TextStyle(
                                     fontSize: Theme.of(context)
                                         .textTheme
@@ -253,11 +161,11 @@ class VideoCardH extends StatelessWidget {
                           Row(
                             children: [
                               if (showView) ...[
-                                StatView(view: _viewCount),
-                                const SizedBox(width: 8),
+                                StatView(view: videoData.viewCount),
+                                const SizedBox(width: AppSpacing.sm),
                               ],
-                              if (showDanmaku && _danmakuCount != null)
-                                StatDanMu(danmu: _danmakuCount),
+                              if (showDanmaku && videoData.danmakuCount != null)
+                                StatDanMu(danmu: videoData.danmakuCount),
                               const Spacer(),
                               if (source == 'normal')
                                 SizedBox(
@@ -320,19 +228,17 @@ class MorePanel extends StatelessWidget {
   final dynamic videoItem;
   const MorePanel({super.key, required this.videoItem});
 
-  String get _ownerName {
-    if (videoItem is Video) {
-      return videoItem.username ?? '';
-    }
-    return videoItem.owner?.name ?? videoItem.author ?? '';
+  /// 获取类型安全的视频数据
+  VideoData get _videoData {
+    final data = toVideoData(videoItem);
+    if (data != null) return data;
+    throw ArgumentError(
+        'Unsupported video item type: ${videoItem.runtimeType}');
   }
 
-  int get _ownerId {
-    if (videoItem is Video) {
-      return videoItem.uid;
-    }
-    return videoItem.owner?.mid ?? videoItem.mid ?? 0;
-  }
+  String get _ownerName => _videoData.ownerName;
+
+  int get _ownerId => _videoData.ownerId;
 
   void blockUser() async {
     SmartDialog.show(
@@ -354,7 +260,8 @@ class MorePanel extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 try {
-                  await Get.find<IUserRepository>().blockUser(blockedId: _ownerId);
+                  await Get.find<IUserRepository>()
+                      .blockUser(blockedId: _ownerId);
                   SmartDialog.dismiss();
                   SmartDialog.showToast('拉黑成功');
                 } catch (error) {
@@ -410,7 +317,7 @@ class MorePanel extends StatelessWidget {
             title:
                 Text('查看视频封面', style: Theme.of(context).textTheme.titleSmall),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );

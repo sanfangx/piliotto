@@ -3,7 +3,8 @@ import '../models/dynamics/result.dart';
 import 'package:piliotto/repositories/base_repository.dart';
 import 'package:piliotto/repositories/i_dynamics_repository.dart';
 
-class OttohubDynamicsRepository extends BaseRepository implements IDynamicsRepository {
+class OttohubDynamicsRepository extends BaseRepository
+    implements IDynamicsRepository {
   @override
   Future<List<DynamicItemModel>> getNewBlogs(
       {int offset = 0, int num = 10}) async {

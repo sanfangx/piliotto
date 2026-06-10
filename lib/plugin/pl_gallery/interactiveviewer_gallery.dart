@@ -125,7 +125,8 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
     _transformationController = TransformationController();
 
     // PC端默认禁用滑动退出
-    _swipeToDismissEnabled = !Platform.isWindows && !Platform.isMacOS && !Platform.isLinux;
+    _swipeToDismissEnabled =
+        !Platform.isWindows && !Platform.isMacOS && !Platform.isLinux;
 
     _showPageNavigationButtons = widget.showPageNavigationButtons;
 
@@ -604,8 +605,8 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                   opacity: _toolbarVisible ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(16),
@@ -695,9 +696,8 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
               ),
               child: SafeArea(
                 top: false,
-                child: _batchMode
-                    ? _buildBatchToolbar()
-                    : _buildNormalToolbar(),
+                child:
+                    _batchMode ? _buildBatchToolbar() : _buildNormalToolbar(),
               ),
             ),
           ),
@@ -968,8 +968,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                       ),
                     ),
                     child: _selectedIndices.contains(index)
-                        ? const Icon(Icons.check,
-                            color: Colors.white, size: 18)
+                        ? const Icon(Icons.check, color: Colors.white, size: 18)
                         : null,
                   ),
                 ),

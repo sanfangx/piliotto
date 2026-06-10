@@ -5,7 +5,8 @@ import 'package:piliotto/common/constants.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/utils/download.dart';
 
-Future<dynamic> imageSaveDialog(BuildContext context, dynamic videoItem, Function closeFn) {
+Future<dynamic> imageSaveDialog(
+    BuildContext context, dynamic videoItem, Function closeFn) {
   final double imgWidth =
       MediaQuery.sizeOf(context).width - StyleString.safeSpace * 2;
   return SmartDialog.show(

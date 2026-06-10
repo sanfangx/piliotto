@@ -8,13 +8,13 @@ class HotController extends GetxController {
   final IVideoRepository _videoRepo = Get.find<IVideoRepository>();
   final ScrollController scrollController = ScrollController();
   final int pageSize = 20;
-  
+
   RxList<Video> videoList = <Video>[].obs;
   int currentPage = 0;
   bool isLoadingMore = false;
   String noMore = '';
   int count = 0;
-  
+
   OverlayEntry? popupDialog;
   RxInt crossAxisCount = 1.obs;
 

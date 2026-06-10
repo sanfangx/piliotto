@@ -44,7 +44,6 @@ class HttpError extends StatelessWidget {
                   backgroundColor: WidgetStateProperty.resolveWith((states) {
                     return Theme.of(context).colorScheme.primary.withAlpha(20);
                   }),
-
                 ),
                 child: Text(
                   btnText ?? '点击重试',

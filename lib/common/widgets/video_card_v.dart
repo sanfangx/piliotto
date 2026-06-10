@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/utils/feed_back.dart';
 import 'package:piliotto/utils/image_save.dart';
 
@@ -186,7 +187,7 @@ class VideoStat extends StatelessWidget {
     return Row(
       children: [
         StatView(view: videoItem.viewCount),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         crossAxisCount > 1 ? const Spacer() : const SizedBox(width: 8),
         RichText(
           maxLines: 1,
@@ -198,7 +199,7 @@ class VideoStat extends StatelessWidget {
             text: Utils.formatTimestampToRelativeTime(videoItem.time),
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }
@@ -293,7 +294,7 @@ class MorePanel extends StatelessWidget {
             title:
                 Text('查看视频封面', style: Theme.of(context).textTheme.titleSmall),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );

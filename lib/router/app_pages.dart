@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:piliotto/pages/setting/pages/logs.dart';
 
 import '../pages/about/index.dart';
+import '../pages/developer/index.dart';
 import '../pages/dynamics/detail/index.dart';
 import '../pages/dynamics/index.dart';
 import '../pages/fan/index.dart';
@@ -51,7 +52,7 @@ class Routes {
   static final List<GetPage<dynamic>> getPages = [
     CustomGetPage(name: '/', page: () => const HomePage()),
     CustomGetPage(name: '/hot', page: () => const HotPage()),
-    CustomGetPage(name: '/search', page: () => const SearchPage()),
+    CustomGetPage(name: '/search', page: () => const VideoSearchPage()),
     CustomGetPage(name: '/video', page: () => const VideoDetailPage()),
     CustomGetPage(name: '/webview', page: () => const WebviewPage()),
     CustomGetPage(name: '/setting', page: () => const SettingPage()),
@@ -97,6 +98,7 @@ class Routes {
     CustomGetPage(
         name: '/whisperDetail', page: () => const WhisperDetailPage()),
     CustomGetPage(name: '/message', page: () => const MessagePage()),
+    CustomGetPage(name: '/developer', page: () => const DeveloperPage()),
   ];
 }
 
@@ -106,6 +108,7 @@ class CustomGetPage extends GetPage<dynamic> {
     required super.page,
     this.fullscreen,
     super.transitionDuration,
+    super.binding,
   }) : super(
           curve: Curves.linear,
           transition: Transition.native,

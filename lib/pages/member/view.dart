@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/mixins/scroll_to_top.dart';
 import 'package:piliotto/common/skeleton/video_card_h.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
@@ -155,11 +156,12 @@ class _MemberPageState extends State<MemberPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text('加载失败',
                 style: TextStyle(
-                    fontSize: 18, color: theme.colorScheme.onSurface)),
-            const SizedBox(height: 24),
+                    fontSize: AppFontSize.xl,
+                    color: theme.colorScheme.onSurface)),
+            const SizedBox(height: AppSpacing.xxl),
             FilledButton.icon(
               onPressed: () =>
                   setState(() => _futureBuilderFuture = _initData()),
@@ -337,7 +339,7 @@ class _MemberPageState extends State<MemberPage>
             ],
           ),
         ],
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
       ],
       floating: true,
       pinned: true,
@@ -578,7 +580,7 @@ class DynamicPanelSkeleton extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.base),
           Container(
             width: double.infinity,
             height: 14,

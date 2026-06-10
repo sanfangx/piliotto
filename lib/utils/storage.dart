@@ -123,7 +123,9 @@ class SettingBoxKey {
       enableSystemProxy = 'enableSystemProxy',
       enableAi = 'enableAi',
       defaultHomePage = 'defaultHomePage',
-      enableRelatedVideo = 'enableRelatedVideo';
+      enableRelatedVideo = 'enableRelatedVideo',
+      // 开发者模式
+      developerMode = 'developerMode';
 
   /// 外观
   static const String themeMode = 'themeMode',

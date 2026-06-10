@@ -291,7 +291,8 @@ class Utils {
     SmartDialog.dismiss();
     var currentInfo = await PackageInfo.fromPlatform();
     var dio = Dio();
-    var result = await dio.get('https://api.github.com/repos/CyaniAgent/piliotto/releases/latest');
+    var result = await dio.get(
+        'https://api.github.com/repos/CyaniAgent/piliotto/releases/latest');
     if (result.data == null || result.data.isEmpty) {
       SmartDialog.showToast('获取远程版本失败，请检查网络');
       return false;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/widgets/markdown_text.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/plugin/pl_gallery/index.dart';
@@ -64,7 +65,7 @@ class _DynamicDetailHeaderState extends State<DynamicDetailHeader> {
         children: [
           _buildAuthorSection(theme, colorScheme, author),
           if (desc != null && desc.text != null && desc.text!.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.base),
             Hero(
               tag: 'content_$dynamicId',
               child: Material(
@@ -81,7 +82,7 @@ class _DynamicDetailHeaderState extends State<DynamicDetailHeader> {
             ),
           ],
           if (hasPics) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.base),
             _buildPicsGrid(),
           ],
         ],
@@ -130,7 +131,7 @@ class _DynamicDetailHeaderState extends State<DynamicDetailHeader> {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.base),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

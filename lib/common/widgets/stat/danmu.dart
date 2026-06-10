@@ -13,8 +13,8 @@ class StatDanMu extends StatelessWidget {
     Map<String, Color> colorObject = {
       'white': Colors.white,
       'gray': Theme.of(context).colorScheme.outline,
-      'black': Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8 * 255),
-
+      'black':
+          Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8 * 255),
     };
     Color color = colorObject[theme]!;
     return StatIconText(

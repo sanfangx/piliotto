@@ -68,9 +68,7 @@ class ActionItem extends StatelessWidget {
                 return ScaleTransition(scale: animation, child: child);
               },
               child: _buildIcon(
-                selectStatus
-                    ? (selectIcon ?? icon)
-                    : icon,
+                selectStatus ? (selectIcon ?? icon) : icon,
                 selectStatus
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.outline,

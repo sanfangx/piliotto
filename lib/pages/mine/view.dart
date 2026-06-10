@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/common/widgets/user_profile_header.dart';
 import 'package:piliotto/models/common/theme_type.dart';
 import 'package:piliotto/pages/fav/index.dart';
@@ -84,7 +85,7 @@ class _MinePageState extends State<MinePage> {
                 color: _getIconColor(theme),
               )),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
       ],
       floating: true,
       pinned: true,
@@ -135,7 +136,7 @@ class _MinePageState extends State<MinePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _buildMenuItems(context, theme),
         ],
       ),
@@ -180,7 +181,7 @@ class _MinePageState extends State<MinePage> {
       title: Text(
         title,
         style: TextStyle(
-          fontSize: 16,
+          fontSize: AppFontSize.lg,
           color: theme.colorScheme.onSurface,
           fontWeight: FontWeight.w500,
         ),

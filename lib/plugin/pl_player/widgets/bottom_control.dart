@@ -55,12 +55,15 @@ class BottomControl extends StatelessWidget implements PreferredSizeWidget {
                     playerController.onChangedSliderStart();
                   },
                   onDragUpdate: (duration) {
-                    playerController.onUpdatedSliderProgress(duration.timeStamp);
+                    playerController
+                        .onUpdatedSliderProgress(duration.timeStamp);
                   },
                   onSeek: (duration) {
                     playerController.onChangedSliderEnd();
-                    playerController.onChangedSlider(duration.inSeconds.toDouble());
-                    playerController.seekTo(Duration(seconds: duration.inSeconds),
+                    playerController
+                        .onChangedSlider(duration.inSeconds.toDouble());
+                    playerController.seekTo(
+                        Duration(seconds: duration.inSeconds),
                         type: 'slider');
                   },
                 ),

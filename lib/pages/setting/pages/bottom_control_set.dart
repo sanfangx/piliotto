@@ -14,10 +14,10 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
     with SingleTickerProviderStateMixin {
   final Box _videoStorage = GStrorage.video;
   late TabController _tabController;
-  
+
   late List<BottomControlType> _halfScreenList;
   late List<BottomControlType> _fullScreenList;
-  
+
   static const List<BottomControlType> _defaultHalfScreenList = [
     BottomControlType.playOrPause,
     BottomControlType.time,
@@ -25,7 +25,7 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
     BottomControlType.fit,
     BottomControlType.fullscreen,
   ];
-  
+
   static const List<BottomControlType> _defaultFullScreenList = [
     BottomControlType.playOrPause,
     BottomControlType.time,
@@ -35,7 +35,7 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
     BottomControlType.speed,
     BottomControlType.fullscreen,
   ];
-  
+
   static const List<BottomControlType> _availableButtons = [
     BottomControlType.playOrPause,
     BottomControlType.time,
@@ -54,16 +54,16 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
   }
 
   void _loadLists() {
-    final halfScreenCodes = _videoStorage
-        .get(VideoBoxKey.halfScreenBottomList)?.cast<String>();
-    final fullScreenCodes = _videoStorage
-        .get(VideoBoxKey.fullScreenBottomList)?.cast<String>();
-    
+    final halfScreenCodes =
+        _videoStorage.get(VideoBoxKey.halfScreenBottomList)?.cast<String>();
+    final fullScreenCodes =
+        _videoStorage.get(VideoBoxKey.fullScreenBottomList)?.cast<String>();
+
     _halfScreenList = BottomControlTypeExtension.fromCodeList(halfScreenCodes);
     if (_halfScreenList.isEmpty) {
       _halfScreenList = List.from(_defaultHalfScreenList);
     }
-    
+
     _fullScreenList = BottomControlTypeExtension.fromCodeList(fullScreenCodes);
     if (_fullScreenList.isEmpty) {
       _fullScreenList = List.from(_defaultFullScreenList);
@@ -126,10 +126,9 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
 
   void _showAddButtonDialog(int tabIndex) {
     final currentList = _getList(tabIndex);
-    final availableToAdd = _availableButtons
-        .where((btn) => !currentList.contains(btn))
-        .toList();
-    
+    final availableToAdd =
+        _availableButtons.where((btn) => !currentList.contains(btn)).toList();
+
     if (availableToAdd.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('已添加所有可用按钮')),
@@ -219,7 +218,7 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
 
   Widget _buildButtonList(int tabIndex) {
     final list = _getList(tabIndex);
-    
+
     if (list.isEmpty) {
       return Center(
         child: Column(

@@ -4,7 +4,8 @@ import '../api/models/message.dart';
 import 'package:piliotto/repositories/base_repository.dart';
 import 'package:piliotto/repositories/i_message_repository.dart';
 
-class OttohubMessageRepository extends BaseRepository implements IMessageRepository {
+class OttohubMessageRepository extends BaseRepository
+    implements IMessageRepository {
   @override
   Future<List<Friend>> getFriendList(
       {int offset = 0, int num = 20, CacheConfig? cacheConfig}) {

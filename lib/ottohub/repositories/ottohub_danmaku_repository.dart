@@ -3,7 +3,8 @@ import '../api/models/danmaku.dart';
 import 'package:piliotto/repositories/base_repository.dart';
 import 'package:piliotto/repositories/i_danmaku_repository.dart';
 
-class OttohubDanmakuRepository extends BaseRepository implements IDanmakuRepository {
+class OttohubDanmakuRepository extends BaseRepository
+    implements IDanmakuRepository {
   @override
   Future<List<Danmaku>> getDanmakus(int vid, {CacheConfig? cacheConfig}) {
     return withCache(
