@@ -1,6 +1,7 @@
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:piliotto/utils/event_bus.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 /// Webview 页面控制器
 ///
@@ -36,7 +37,7 @@ class WebviewController extends GetxController {
   String pageTitle = '';
 
   /// WebView 控制器
-  final WebViewController controller = WebViewController();
+  InAppWebViewController? webViewController;
 
   /// 加载进度（0-100）
   RxInt loadProgress = 0.obs;
@@ -44,60 +45,122 @@ class WebviewController extends GetxController {
   /// 是否显示加载进度条
   RxBool loadShow = true.obs;
 
+  /// 是否正在加载
+  RxBool isLoading = true.obs;
+
+  /// 是否加载失败
+  RxBool hasError = false.obs;
+
+  /// 错误信息
+  RxString errorMessage = ''.obs;
+
   /// 事件总线
   EventBus eventBus = EventBus();
 
   @override
   void onInit() {
     super.onInit();
-    url = Get.parameters['url']!;
-    type.value = Get.parameters['type']!;
-    pageTitle = Get.parameters['pageTitle']!;
+    url = Get.parameters['url'] ?? '';
+    type.value = Get.parameters['type'] ?? '';
+    pageTitle = Get.parameters['pageTitle'] ?? '';
 
-    if (type.value == 'login') {
-      controller.clearCache();
-      controller.clearLocalStorage();
-      WebViewCookieManager().clearCookies();
+    // 如果 URL 为空，返回上一页
+    if (url.isEmpty) {
+      SmartDialog.showToast('URL 参数缺失');
+      Get.back();
+      return;
     }
-
-    webviewInit();
   }
 
-  void webviewInit() {
-    controller
-      ..setUserAgent(
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            loadProgress.value = progress;
-          },
-          onPageStarted: (String url) {},
-          onUrlChange: (UrlChange urlChange) async {
-            loadShow.value = false;
-          },
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('ottohub://')) {
-              if (request.url.startsWith('ottohub://video/')) {
-                final uri = Uri.parse(request.url);
-                if (uri.pathSegments.isNotEmpty) {
-                  final vid = int.tryParse(uri.pathSegments[0]);
-                  if (vid != null) {
-                    Get.offAndToNamed('/video?vid=$vid', arguments: {
-                      'pic': '',
-                      'heroTag': 'video_$vid',
-                    });
-                  }
-                }
-              }
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(url.startsWith('http') ? url : 'https://$url'));
+  /// WebView 创建完成回调
+  void onWebViewCreated(InAppWebViewController controller) {
+    webViewController = controller;
+
+    if (type.value == 'login') {
+      clearCache();
+    }
+
+    // 加载 URL
+    controller.loadUrl(
+      urlRequest: URLRequest(
+        url: WebUri(url.startsWith('http') ? url : 'https://$url'),
+      ),
+    );
+  }
+
+  /// 清除缓存
+  Future<void> clearCache() async {
+    await InAppWebViewController.clearAllCache();
+    await CookieManager.instance().deleteAllCookies();
+  }
+
+  /// 刷新页面
+  Future<void> reload() async {
+    if (webViewController != null) {
+      await webViewController!.reload();
+    }
+  }
+
+  /// 加载进度回调
+  void onProgressChanged(int progress) {
+    loadProgress.value = progress;
+    if (progress == 100) {
+      isLoading.value = false;
+    }
+  }
+
+  /// URL 变化回调
+  void onUrlChanged(Uri? uri) {
+    loadShow.value = false;
+    isLoading.value = true;
+    hasError.value = false;
+    errorMessage.value = '';
+  }
+
+  /// 加载完成回调
+  void onLoadStop(Uri? uri) {
+    isLoading.value = false;
+    loadShow.value = false;
+  }
+
+  /// 加载错误回调
+  void onLoadError(WebResourceRequest? request, WebResourceError error) {
+    isLoading.value = false;
+    hasError.value = true;
+    errorMessage.value = error.description;
+    SmartDialog.showToast('加载失败: ${error.description}');
+  }
+
+  /// 重新加载
+  void retry() {
+    hasError.value = false;
+    errorMessage.value = '';
+    isLoading.value = true;
+    reload();
+  }
+
+  /// 导航请求处理
+  Future<NavigationActionPolicy?> shouldOverrideUrlLoading(
+    InAppWebViewController controller,
+    NavigationAction navigationAction,
+  ) async {
+    final requestUrl = navigationAction.request.url?.toString() ?? '';
+
+    if (requestUrl.startsWith('ottohub://')) {
+      if (requestUrl.startsWith('ottohub://video/')) {
+        final uri = navigationAction.request.url;
+        if (uri != null && uri.pathSegments.isNotEmpty) {
+          final vid = int.tryParse(uri.pathSegments[0]);
+          if (vid != null) {
+            Get.offAndToNamed('/video?vid=$vid', arguments: {
+              'pic': '',
+              'heroTag': 'video_$vid',
+            });
+          }
+        }
+      }
+      return NavigationActionPolicy.CANCEL;
+    }
+    return NavigationActionPolicy.ALLOW;
   }
 }

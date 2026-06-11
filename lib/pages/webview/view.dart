@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:piliotto/common/constants/app_styles.dart';
 import 'package:piliotto/utils/login.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'controller.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 /// 通用网页界面组件
 ///
@@ -57,7 +58,7 @@ class _WebviewPageState extends State<WebviewPage> {
       const SizedBox(width: 4),
       IconButton(
         onPressed: () {
-          _webviewController.controller.reload();
+          _webviewController.reload();
         },
         icon: Icon(Icons.refresh_outlined,
             color: Theme.of(context).colorScheme.primary),
@@ -73,13 +74,80 @@ class _WebviewPageState extends State<WebviewPage> {
         () => _webviewController.type.value == 'login'
             ? TextButton(
                 onPressed: () => LoginUtils.confirmLogin(
-                    null, _webviewController.controller),
+                    null, _webviewController.webViewController),
                 child: const Text('刷新登录状态'),
               )
             : const SizedBox(),
       ),
       const SizedBox(width: 12)
     ];
+  }
+
+  /// 构建加载中状态
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: AppSpacing.base),
+          Obx(() => Text(
+                '加载中... ${_webviewController.loadProgress.value}%',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  /// 构建错误状态
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: AppSpacing.base),
+            Text(
+              '加载失败',
+              style: TextStyle(
+                fontSize: AppFontSize.xl,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Obx(() => Text(
+                  _webviewController.errorMessage.value,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                )),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton.icon(
+              onPressed: _webviewController.retry,
+              icon: const Icon(Icons.refresh_outlined),
+              label: const Text('重新加载'),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextButton.icon(
+              onPressed: () => launchUrl(Uri.parse(_webviewController.url)),
+              icon: const Icon(Icons.open_in_browser_outlined),
+              label: const Text('在浏览器中打开'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -119,7 +187,41 @@ class _WebviewPageState extends State<WebviewPage> {
                 child: const Text('登录成功未自动跳转?  请点击右上角「刷新登录状态」'),
               ),
             Expanded(
-              child: WebViewWidget(controller: _webviewController.controller),
+              child: Obx(() {
+                // 显示错误状态
+                if (_webviewController.hasError.value) {
+                  return _buildErrorState();
+                }
+
+                // 显示加载中状态（只要正在加载就显示）
+                if (_webviewController.isLoading.value) {
+                  return _buildLoadingState();
+                }
+
+                // 显示 WebView
+                return InAppWebView(
+                  initialSettings: InAppWebViewSettings(
+                    userAgent:
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    javaScriptEnabled: true,
+                  ),
+                  onWebViewCreated: _webviewController.onWebViewCreated,
+                  onProgressChanged: (controller, progress) {
+                    _webviewController.onProgressChanged(progress);
+                  },
+                  onLoadStart: (controller, url) {
+                    _webviewController.onUrlChanged(url);
+                  },
+                  onLoadStop: (controller, url) {
+                    _webviewController.onLoadStop(url);
+                  },
+                  onReceivedError: (controller, request, error) {
+                    _webviewController.onLoadError(request, error);
+                  },
+                  shouldOverrideUrlLoading:
+                      _webviewController.shouldOverrideUrlLoading,
+                );
+              }),
             ),
           ],
         ));

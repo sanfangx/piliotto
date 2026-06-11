@@ -2,37 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:piliotto/services/network_debug_service.dart';
+import 'package:piliotto/services/system_info_service.dart';
 import 'package:piliotto/utils/storage.dart';
 
 /// 开发者选项页面控制器
 ///
 /// 提供开发者模式相关的功能控制，包括：
+/// - 系统信息展示
+/// - 快捷操作
 /// - 路由跳转测试
-/// - 组件展示测试
-/// - 对话框测试
-/// - 状态页面测试
 /// - 内置浏览器
 /// - 路由信息查看
-/// - 网络调试
 /// - 开发者模式开关
 class DeveloperController extends GetxController {
   /// 设置存储
   Box setting = GStrorage.setting;
 
+  /// 系统信息服务
+  final SystemInfoService _systemInfoService = SystemInfoService();
+
+  /// 系统信息
+  final RxMap<String, Map<String, dynamic>> systemInfo = <String, Map<String, dynamic>>{}.obs;
+
+  /// 是否正在加载系统信息
+  final RxBool isLoadingSystemInfo = false.obs;
+
   /// 路由路径输入控制器
   final TextEditingController routePathController = TextEditingController();
 
-  /// 路由参数输入控制器（JSON格式）
+  /// 路由参数输入控制器
   final TextEditingController routeParamsController = TextEditingController();
 
   /// WebView URL 输入控制器
   final TextEditingController webviewUrlController = TextEditingController();
 
+  /// WebView 页面标题输入控制器
+  final TextEditingController webviewTitleController = TextEditingController();
+
+  /// WebView 页面类型输入控制器
+  final TextEditingController webviewTypeController = TextEditingController();
+
   /// 开发者模式是否启用
   RxBool developerModeEnabled = true.obs;
 
-  /// 网络请求日志列表（占位符，后续完善）
-  RxList<Map<String, dynamic>> networkLogs = <Map<String, dynamic>>[].obs;
+  /// 是否显示 AppBar
+  RxBool webviewShowAppBar = true.obs;
 
   @override
   void onInit() {
@@ -40,6 +55,9 @@ class DeveloperController extends GetxController {
     // 初始化开发者模式状态
     developerModeEnabled.value =
         setting.get(SettingBoxKey.developerMode, defaultValue: false);
+
+    // 加载系统信息
+    loadSystemInfo();
   }
 
   @override
@@ -47,12 +65,65 @@ class DeveloperController extends GetxController {
     routePathController.dispose();
     routeParamsController.dispose();
     webviewUrlController.dispose();
+    webviewTitleController.dispose();
+    webviewTypeController.dispose();
     super.onClose();
   }
 
+  /// 加载系统信息
+  Future<void> loadSystemInfo() async {
+    isLoadingSystemInfo.value = true;
+    try {
+      final info = await _systemInfoService.getAllSystemInfo();
+      systemInfo.value = info;
+    } catch (e) {
+      SmartDialog.showToast('加载系统信息失败: $e');
+    } finally {
+      isLoadingSystemInfo.value = false;
+    }
+  }
+
+  /// 清除缓存
+  Future<void> clearCache() async {
+    try {
+      final success = await _systemInfoService.clearCache();
+      if (success) {
+        SmartDialog.showToast('缓存已清除');
+        // 重新加载系统信息
+        await loadSystemInfo();
+      } else {
+        SmartDialog.showToast('清除缓存失败');
+      }
+    } catch (e) {
+      SmartDialog.showToast('清除缓存失败: $e');
+    }
+  }
+
+  /// 清除所有存储
+  Future<void> clearAllStorage() async {
+    try {
+      // 清除 Hive 所有 box
+      await GStrorage.setting.clear();
+      SmartDialog.showToast('存储已清除');
+      // 重新加载系统信息
+      await loadSystemInfo();
+    } catch (e) {
+      SmartDialog.showToast('清除存储失败: $e');
+    }
+  }
+
+  /// 重置设置
+  Future<void> resetSettings() async {
+    try {
+      // 清除设置
+      await GStrorage.setting.clear();
+      SmartDialog.showToast('设置已重置');
+    } catch (e) {
+      SmartDialog.showToast('重置设置失败: $e');
+    }
+  }
+
   /// 执行路由跳转
-  ///
-  /// 根据输入的路由路径和参数进行跳转
   void navigateToRoute() {
     final String path = routePathController.text.trim();
     if (path.isEmpty) {
@@ -91,8 +162,6 @@ class DeveloperController extends GetxController {
   }
 
   /// 打开 WebView 页面
-  ///
-  /// 跳转到 WebView 页面并加载指定 URL
   void openWebview() {
     String url = webviewUrlController.text.trim();
     if (url.isEmpty) {
@@ -105,12 +174,40 @@ class DeveloperController extends GetxController {
       url = 'https://$url';
     }
 
-    Get.toNamed('/webview', parameters: {'url': url, 'pageTitle': '开发者浏览器'});
+    // 构建参数
+    final String pageTitle = webviewTitleController.text.trim().isEmpty
+        ? '开发者浏览器'
+        : webviewTitleController.text.trim();
+    final String type = webviewTypeController.text.trim();
+
+    // 构建路由参数
+    final Map<String, String> parameters = {
+      'url': url,
+      'pageTitle': pageTitle,
+    };
+    if (type.isNotEmpty) {
+      parameters['type'] = type;
+    }
+
+    // 构建路由参数（showAppBar 通过 arguments 传递）
+    final Map<String, dynamic> arguments = {
+      'showAppBar': webviewShowAppBar.value,
+    };
+
+    Get.toNamed('/webview', parameters: parameters, arguments: arguments);
+  }
+
+  /// 打开网络调试页面
+  void openNetworkDebug() {
+    Get.toNamed('/networkDebug');
+  }
+
+  /// 打开性能分析页面
+  void openPerformance() {
+    Get.toNamed('/performance');
   }
 
   /// 获取当前路由栈信息
-  ///
-  /// 返回当前路由栈的详细信息
   List<Map<String, dynamic>> getRouteStackInfo() {
     final List<Map<String, dynamic>> stackInfo = [];
     try {
@@ -130,8 +227,6 @@ class DeveloperController extends GetxController {
   }
 
   /// 获取当前路由参数
-  ///
-  /// 返回当前页面的路由参数
   Map<String, dynamic>? getCurrentRouteParameters() {
     try {
       return Get.parameters;
@@ -141,8 +236,6 @@ class DeveloperController extends GetxController {
   }
 
   /// 关闭开发者模式
-  ///
-  /// 将开发者模式设置为关闭状态，并返回上一页
   void closeDeveloperMode() {
     SmartDialog.show(
       useSystem: true,
@@ -172,20 +265,13 @@ class DeveloperController extends GetxController {
     );
   }
 
-  /// 添加网络请求日志（占位符方法）
-  ///
-  /// 用于记录网络请求信息，后续可接入实际的网络拦截器
-  void addNetworkLog(Map<String, dynamic> log) {
-    networkLogs.insert(0, log);
-    // 限制日志数量
-    if (networkLogs.length > 100) {
-      networkLogs.removeLast();
+  /// 获取网络日志统计
+  Map<String, int> getNetworkStatistics() {
+    try {
+      final service = Get.find<NetworkDebugService>();
+      return service.getStatistics();
+    } catch (e) {
+      return {'total': 0, 'success': 0, 'error': 0, 'pending': 0};
     }
-  }
-
-  /// 清空网络请求日志
-  void clearNetworkLogs() {
-    networkLogs.clear();
-    SmartDialog.showToast('网络日志已清空');
   }
 }

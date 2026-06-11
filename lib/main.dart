@@ -34,10 +34,11 @@ import 'package:piliotto/ottohub/repositories/ottohub_comment_repository.dart';
 import 'package:piliotto/repositories/i_comment_repository.dart';
 import 'package:piliotto/repositories/i_message_repository.dart';
 import 'package:piliotto/ottohub/repositories/ottohub_message_repository.dart';
-import 'package:piliotto/ottohub/repositories/ottohub_danmaku_repository.dart';
 import 'package:piliotto/repositories/i_danmaku_repository.dart';
+import 'package:piliotto/ottohub/repositories/ottohub_danmaku_repository.dart';
 import 'package:piliotto/utils/recommend_filter.dart';
 import 'package:catcher_2/catcher_2.dart';
+import 'package:piliotto/ottohub/api/services/api_service.dart';
 
 import './services/loggeer.dart';
 
@@ -75,6 +76,9 @@ void main() async {
   Get.put<ICommentRepository>(OttohubCommentRepository());
   Get.put<IMessageRepository>(OttohubMessageRepository());
   Get.put<IDanmakuRepository>(OttohubDanmakuRepository());
+
+  // 初始化 API 服务（包含网络调试拦截器）
+  ApiService.init();
 
   // 异常捕获 logo记录
   final Catcher2Options releaseConfig = Catcher2Options(

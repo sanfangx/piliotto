@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:piliotto/common/constants/app_styles.dart';
+import 'package:piliotto/services/network_debug_service.dart';
 import 'controller.dart';
 
 /// 开发者选项页面
 ///
 /// 提供开发者调试和测试功能，包括：
-/// - 页面测试：路由跳转、组件展示、对话框、状态页面
-/// - 内置浏览器：打开 WebView 页面
-/// - 路由信息：查看当前路由栈和参数
-/// - 网络调试：查看网络请求日志
+/// - 系统信息展示
+/// - 快捷操作
+/// - 调试工具
+/// - 路由信息
 /// - 关闭开发者模式
 class DeveloperPage extends StatelessWidget {
   const DeveloperPage({super.key});
@@ -30,6 +31,11 @@ class DeveloperPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            onPressed: controller.loadSystemInfo,
+            icon: Icon(Icons.refresh_outlined, color: colorScheme.primary),
+            tooltip: '刷新',
+          ),
+          IconButton(
             onPressed: controller.closeDeveloperMode,
             icon: Icon(
               Icons.power_settings_new_outlined,
@@ -42,49 +48,23 @@ class DeveloperPage extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          // 页面测试分组
-          _buildSection(
-            context,
-            title: '页面测试',
-            icon: Icons.pages_outlined,
-            children: [
-              _buildRouteTestTile(context, controller),
-              _buildComponentTestTile(context),
-              _buildDialogTestTile(context),
-              _buildStatePageTestTile(context),
-            ],
-          ),
+          // 系统信息
+          _buildSystemInfoSection(context, controller),
 
-          // 内置浏览器分组
-          _buildSection(
-            context,
-            title: '内置浏览器',
-            icon: Icons.language_outlined,
-            children: [
-              _buildWebviewTile(context, controller),
-            ],
-          ),
+          const Divider(height: 1),
 
-          // 路由信息分组
-          _buildSection(
-            context,
-            title: '路由信息',
-            icon: Icons.route_outlined,
-            children: [
-              _buildRouteStackTile(context, controller),
-              _buildRouteParamsTile(context, controller),
-            ],
-          ),
+          // 快捷操作
+          _buildQuickActionsSection(context, controller),
 
-          // 网络调试分组
-          _buildSection(
-            context,
-            title: '网络调试',
-            icon: Icons.network_check_outlined,
-            children: [
-              _buildNetworkLogTile(context, controller),
-            ],
-          ),
+          const Divider(height: 1),
+
+          // 调试工具
+          _buildDebugToolsSection(context, controller),
+
+          const Divider(height: 1),
+
+          // 路由信息
+          _buildRouteInfoSection(context, controller),
 
           // 关闭开发者模式
           const SizedBox(height: AppSpacing.lg),
@@ -105,13 +85,105 @@ class DeveloperPage extends StatelessWidget {
     );
   }
 
-  /// 构建分组标题
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
+  /// 构建系统信息区域
+  Widget _buildSystemInfoSection(BuildContext context, DeveloperController controller) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return ExpansionTile(
+      leading: Icon(Icons.info_outline, color: colorScheme.primary),
+      title: const Text('系统信息'),
+      subtitle: Obx(() => Text(
+            controller.isLoadingSystemInfo.value ? '加载中...' : '设备、应用、存储信息',
+          )),
+      initiallyExpanded: false,
+      children: [
+        Obx(() {
+          if (controller.isLoadingSystemInfo.value) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final info = controller.systemInfo;
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 设备信息
+                if (info['device'] != null) ...[
+                  _buildInfoCard(context, '设备信息', info['device']!),
+                  const SizedBox(height: AppSpacing.base),
+                ],
+                // 应用信息
+                if (info['app'] != null) ...[
+                  _buildInfoCard(context, '应用信息', info['app']!),
+                  const SizedBox(height: AppSpacing.base),
+                ],
+                // 存储信息
+                if (info['storage'] != null)
+                  _buildInfoCard(context, '存储信息', info['storage']!),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  /// 构建信息卡片
+  Widget _buildInfoCard(BuildContext context, String title, Map<String, dynamic> info) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: AppFontSize.base,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...info.entries.map((entry) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          entry.key,
+                          style: TextStyle(
+                            fontSize: AppFontSize.sm,
+                            color: colorScheme.outline,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          entry.value.toString(),
+                          style: const TextStyle(fontSize: AppFontSize.sm),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建快捷操作区域
+  Widget _buildQuickActionsSection(BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -121,10 +193,10 @@ class DeveloperPage extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: colorScheme.primary),
+              Icon(Icons.flash_on_outlined, size: 20, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                title,
+                '快捷操作',
                 style: TextStyle(
                   fontSize: AppFontSize.lg,
                   fontWeight: FontWeight.bold,
@@ -134,8 +206,103 @@ class DeveloperPage extends StatelessWidget {
             ],
           ),
         ),
-        ...children,
-        const Divider(height: 1),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.tonal(
+                onPressed: () => _showConfirmDialog(
+                  context,
+                  '清除缓存',
+                  '确认要清除缓存吗？',
+                  controller.clearCache,
+                ),
+                child: const Text('清除缓存'),
+              ),
+              FilledButton.tonal(
+                onPressed: () => _showConfirmDialog(
+                  context,
+                  '清除存储',
+                  '确认要清除所有存储吗？这将删除所有本地数据。',
+                  controller.clearAllStorage,
+                ),
+                child: const Text('清除存储'),
+              ),
+              FilledButton.tonal(
+                onPressed: () => _showConfirmDialog(
+                  context,
+                  '重置设置',
+                  '确认要重置所有设置吗？',
+                  controller.resetSettings,
+                ),
+                child: const Text('重置设置'),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  /// 构建调试工具区域
+  Widget _buildDebugToolsSection(BuildContext context, DeveloperController controller) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            children: [
+              Icon(Icons.build_outlined, size: 20, color: colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                '调试工具',
+                style: TextStyle(
+                  fontSize: AppFontSize.lg,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // 网络调试
+        ListTile(
+          leading: Icon(Icons.network_check_outlined, color: colorScheme.primary),
+          title: const Text('网络调试'),
+          subtitle: Obx(() {
+            try {
+              final service = Get.find<NetworkDebugService>();
+              final stats = service.getStatistics();
+              return Text('共 ${stats['total']} 条请求');
+            } catch (e) {
+              return const Text('查看网络请求日志');
+            }
+          }),
+          trailing: const Icon(Icons.chevron_right_outlined),
+          onTap: controller.openNetworkDebug,
+        ),
+        // 性能分析
+        ListTile(
+          leading: Icon(Icons.speed_outlined, color: colorScheme.primary),
+          title: const Text('性能分析'),
+          subtitle: const Text('帧率、内存、启动耗时'),
+          trailing: const Icon(Icons.chevron_right_outlined),
+          onTap: controller.openPerformance,
+        ),
+        // 路由跳转测试
+        _buildRouteTestTile(context, controller),
+        // 内置浏览器
+        _buildWebviewTile(context, controller),
+        // 对话框测试
+        _buildDialogTestTile(context),
+        // 状态页面测试
+        _buildStatePageTestTile(context),
       ],
     );
   }
@@ -185,18 +352,72 @@ class DeveloperPage extends StatelessWidget {
     );
   }
 
-  /// 构建组件展示测试项
-  Widget _buildComponentTestTile(BuildContext context) {
+  /// 构建 WebView 测试项
+  Widget _buildWebviewTile(BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return ListTile(
-      leading: Icon(Icons.widgets_outlined, color: colorScheme.primary),
-      title: const Text('组件展示测试'),
-      subtitle: const Text('展示各种通用组件的效果'),
-      trailing: const Icon(Icons.chevron_right_outlined),
-      onTap: () {
-        SmartDialog.showToast('组件展示测试页面开发中...');
-      },
+    return ExpansionTile(
+      leading: Icon(Icons.public_outlined, color: colorScheme.primary),
+      title: const Text('内置浏览器'),
+      subtitle: const Text('配置并打开 WebView 页面'),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: controller.webviewUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'URL *',
+                  hintText: '例如: www.example.com',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller.webviewTitleController,
+                decoration: const InputDecoration(
+                  labelText: '页面标题',
+                  hintText: '默认: 开发者浏览器',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller.webviewTypeController,
+                decoration: const InputDecoration(
+                  labelText: '页面类型',
+                  hintText: '例如: login',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Obx(() => SwitchListTile(
+                    title: const Text('显示 AppBar'),
+                    value: controller.webviewShowAppBar.value,
+                    onChanged: (value) {
+                      controller.webviewShowAppBar.value = value;
+                    },
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  )),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: controller.openWebview,
+                  icon: const Icon(Icons.open_in_browser_outlined),
+                  label: const Text('打开'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -272,119 +493,82 @@ class DeveloperPage extends StatelessWidget {
     );
   }
 
-  /// 构建 WebView 测试项
-  Widget _buildWebviewTile(BuildContext context, DeveloperController controller) {
+  /// 构建路由信息区域
+  Widget _buildRouteInfoSection(BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return ExpansionTile(
-      leading: Icon(Icons.public_outlined, color: colorScheme.primary),
-      title: const Text('打开内置浏览器'),
-      subtitle: const Text('输入 URL 打开 WebView 页面'),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
             children: [
-              TextField(
-                controller: controller.webviewUrlController,
-                decoration: const InputDecoration(
-                  labelText: 'URL',
-                  hintText: '例如: www.example.com',
-                  border: OutlineInputBorder(),
-                  isDense: true,
+              Icon(Icons.route_outlined, size: 20, color: colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                '路由信息',
+                style: TextStyle(
+                  fontSize: AppFontSize.lg,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
                 ),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: controller.openWebview,
-                icon: const Icon(Icons.open_in_browser_outlined),
-                label: const Text('打开'),
               ),
             ],
           ),
+        ),
+        ListTile(
+          leading: Icon(Icons.layers_outlined, color: colorScheme.primary),
+          title: const Text('查看路由栈信息'),
+          subtitle: const Text('显示当前路由栈的详细信息'),
+          trailing: const Icon(Icons.chevron_right_outlined),
+          onTap: () {
+            final stackInfo = controller.getRouteStackInfo();
+            _showRouteInfoDialog(context, '路由栈信息', stackInfo);
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.data_object_outlined, color: colorScheme.primary),
+          title: const Text('查看当前路由参数'),
+          subtitle: const Text('显示当前页面的路由参数'),
+          trailing: const Icon(Icons.chevron_right_outlined),
+          onTap: () {
+            final params = controller.getCurrentRouteParameters();
+            _showRouteInfoDialog(
+              context,
+              '路由参数',
+              params != null ? [params] : [],
+            );
+          },
         ),
       ],
     );
   }
 
-  /// 构建路由栈信息项
-  Widget _buildRouteStackTile(BuildContext context, DeveloperController controller) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return ListTile(
-      leading: Icon(Icons.layers_outlined, color: colorScheme.primary),
-      title: const Text('查看路由栈信息'),
-      subtitle: const Text('显示当前路由栈的详细信息'),
-      trailing: const Icon(Icons.chevron_right_outlined),
-      onTap: () {
-        final stackInfo = controller.getRouteStackInfo();
-        _showRouteInfoDialog(context, '路由栈信息', stackInfo);
-      },
-    );
-  }
-
-  /// 构建路由参数项
-  Widget _buildRouteParamsTile(BuildContext context, DeveloperController controller) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return ListTile(
-      leading: Icon(Icons.data_object_outlined, color: colorScheme.primary),
-      title: const Text('查看当前路由参数'),
-      subtitle: const Text('显示当前页面的路由参数'),
-      trailing: const Icon(Icons.chevron_right_outlined),
-      onTap: () {
-        final params = controller.getCurrentRouteParameters();
-        _showRouteInfoDialog(
-          context,
-          '路由参数',
-          params != null ? [params] : [],
-        );
-      },
-    );
-  }
-
-  /// 构建网络日志项
-  Widget _buildNetworkLogTile(BuildContext context, DeveloperController controller) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return Obx(
-      () => ExpansionTile(
-        leading: Icon(Icons.history_outlined, color: colorScheme.primary),
-        title: const Text('网络请求日志'),
-        subtitle: Text('共 ${controller.networkLogs.length} 条记录'),
-        children: [
-          if (controller.networkLogs.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('暂无网络请求日志'),
-            )
-          else
-            Column(
-              children: [
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.networkLogs.length > 20
-                      ? 20
-                      : controller.networkLogs.length,
-                  itemBuilder: (context, index) {
-                    final log = controller.networkLogs[index];
-                    return ListTile(
-                      dense: true,
-                      title: Text(log['url'] ?? 'Unknown'),
-                      subtitle: Text(log['method'] ?? ''),
-                    );
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: OutlinedButton(
-                    onPressed: controller.clearNetworkLogs,
-                    child: const Text('清空日志'),
-                  ),
-                ),
-              ],
-            ),
+  /// 显示确认对话框
+  void _showConfirmDialog(
+    BuildContext context,
+    String title,
+    String message,
+    VoidCallback onConfirm,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
+            child: const Text('确认'),
+          ),
         ],
       ),
     );

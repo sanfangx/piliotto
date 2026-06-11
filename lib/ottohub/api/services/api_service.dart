@@ -1,6 +1,8 @@
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
+import 'package:get/get.dart';
 import 'package:piliotto/utils/storage.dart';
 import 'package:piliotto/services/loggeer.dart';
+import 'package:piliotto/services/network_debug_service.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -24,7 +26,7 @@ class ApiService {
   static const String apiPath = '/api';
   static const String _tokenKey = 'ottohub_token';
 
-  static final Dio _dio = Dio(BaseOptions(
+  static final dio.Dio _dio = dio.Dio(dio.BaseOptions(
     baseUrl: '$baseUrl$apiPath',
     connectTimeout: const Duration(seconds: 30),
     receiveTimeout: const Duration(seconds: 60),
@@ -40,7 +42,17 @@ class ApiService {
     if (_initialized) return;
     _initialized = true;
 
-    _dio.interceptors.add(InterceptorsWrapper(
+    // 初始化网络调试服务（默认禁用，可通过开发者选项启用）
+    try {
+      final networkDebugService = Get.put(NetworkDebugService());
+      // 默认禁用，避免生产环境性能影响
+      networkDebugService.isEnabled.value = false;
+      _dio.interceptors.add(NetworkDebugInterceptor(networkDebugService));
+    } catch (e) {
+      // 忽略初始化失败
+    }
+
+    _dio.interceptors.add(dio.InterceptorsWrapper(
       onRequest: (options, handler) {
         final token = getToken();
         if (token != null && !_shouldSkipToken(options)) {
@@ -65,7 +77,7 @@ class ApiService {
     ));
   }
 
-  static bool _shouldSkipToken(RequestOptions options) {
+  static bool _shouldSkipToken(dio.RequestOptions options) {
     final skipToken = options.extra['skipToken'] as bool?;
     return skipToken == true;
   }
@@ -82,17 +94,17 @@ class ApiService {
     GStrorage.setting.delete(_tokenKey);
   }
 
-  static String _getFriendlyErrorMessage(DioException e) {
+  static String _getFriendlyErrorMessage(dio.DioException e) {
     switch (e.type) {
-      case DioExceptionType.connectionTimeout:
+      case dio.DioExceptionType.connectionTimeout:
         return '连接超时，请检查网络后重试';
-      case DioExceptionType.sendTimeout:
+      case dio.DioExceptionType.sendTimeout:
         return '发送超时，请检查网络后重试';
-      case DioExceptionType.receiveTimeout:
+      case dio.DioExceptionType.receiveTimeout:
         return '响应超时，请稍后重试';
-      case DioExceptionType.badCertificate:
+      case dio.DioExceptionType.badCertificate:
         return '证书错误，请检查网络环境';
-      case DioExceptionType.badResponse:
+      case dio.DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
         if (statusCode == 401) return '未授权，请重新登录';
         if (statusCode == 403) return '访问被拒绝';
@@ -101,11 +113,11 @@ class ApiService {
         if (statusCode == 502) return '网关错误，请稍后重试';
         if (statusCode == 503) return '服务暂不可用，请稍后重试';
         return '请求失败 (${statusCode ?? '未知'})';
-      case DioExceptionType.cancel:
+      case dio.DioExceptionType.cancel:
         return '请求已取消';
-      case DioExceptionType.connectionError:
+      case dio.DioExceptionType.connectionError:
         return '网络连接失败，请检查网络设置';
-      case DioExceptionType.unknown:
+      case dio.DioExceptionType.unknown:
         if (e.message?.contains('SocketException') == true) {
           return '网络连接失败，请检查网络设置';
         }
@@ -157,14 +169,14 @@ class ApiService {
       throw ApiException('请先登录');
     }
 
-    final options = Options(
+    final options = dio.Options(
       method: method,
       headers: headers,
       extra: {'skipToken': skipToken},
     );
 
     try {
-      Response response;
+      dio.Response response;
 
       switch (method.toUpperCase()) {
         case 'GET':
@@ -213,14 +225,14 @@ class ApiService {
       }
 
       return responseData;
-    } on DioException catch (e) {
+    } on dio.DioException catch (e) {
       logger.e('API Request Error: ${e.message}');
       final friendlyMessage = _getFriendlyErrorMessage(e);
-      final isTimeout = e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.sendTimeout ||
-          e.type == DioExceptionType.receiveTimeout;
-      final isNetworkError = e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.unknown;
+      final isTimeout = e.type == dio.DioExceptionType.connectionTimeout ||
+          e.type == dio.DioExceptionType.sendTimeout ||
+          e.type == dio.DioExceptionType.receiveTimeout;
+      final isNetworkError = e.type == dio.DioExceptionType.connectionError ||
+          e.type == dio.DioExceptionType.unknown;
       throw ApiException(
         friendlyMessage,
         e.response?.statusCode,

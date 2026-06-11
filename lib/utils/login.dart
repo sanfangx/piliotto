@@ -1,3 +1,4 @@
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:piliotto/models/user/info.dart';
@@ -7,7 +8,6 @@ import 'package:piliotto/pages/home/index.dart';
 import 'package:piliotto/pages/media/index.dart';
 import 'package:piliotto/pages/mine/index.dart';
 import 'package:piliotto/utils/storage.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class LoginUtils {
   static Future refreshLoginStatus(bool status) async {
@@ -34,7 +34,7 @@ class LoginUtils {
     }
   }
 
-  static Future confirmLogin(String? url, WebViewController? controller) async {
+  static Future confirmLogin(String? url, InAppWebViewController? controller) async {
     SmartDialog.showToast('Ottohub 请使用应用内登录功能');
     if (controller != null) {
       // 关闭 webview

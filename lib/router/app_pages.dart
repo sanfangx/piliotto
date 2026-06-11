@@ -6,7 +6,10 @@ import 'package:hive/hive.dart';
 import 'package:piliotto/pages/setting/pages/logs.dart';
 
 import '../pages/about/index.dart';
+// 开发者选项页面导入
 import '../pages/developer/index.dart';
+import '../pages/developer/network_debug/index.dart';
+import '../pages/developer/performance/index.dart';
 import '../pages/dynamics/detail/index.dart';
 import '../pages/dynamics/index.dart';
 import '../pages/fan/index.dart';
@@ -54,7 +57,13 @@ class Routes {
     CustomGetPage(name: '/hot', page: () => const HotPage()),
     CustomGetPage(name: '/search', page: () => const VideoSearchPage()),
     CustomGetPage(name: '/video', page: () => const VideoDetailPage()),
-    CustomGetPage(name: '/webview', page: () => const WebviewPage()),
+    CustomGetPage(name: '/webview', page: () {
+      final args = Get.arguments as Map<String, dynamic>?;
+      return WebviewPage(
+        showAppBar: args?['showAppBar'] ?? true,
+        appBarTitle: args?['appBarTitle'],
+      );
+    }),
     CustomGetPage(name: '/setting', page: () => const SettingPage()),
     CustomGetPage(name: '/media', page: () => const MediaPage()),
     CustomGetPage(name: '/fav', page: () => const FavPage()),
@@ -98,7 +107,10 @@ class Routes {
     CustomGetPage(
         name: '/whisperDetail', page: () => const WhisperDetailPage()),
     CustomGetPage(name: '/message', page: () => const MessagePage()),
+    // 开发者选项路由（需要通过特定方式激活才能访问）
     CustomGetPage(name: '/developer', page: () => const DeveloperPage()),
+    CustomGetPage(name: '/networkDebug', page: () => const NetworkDebugPage()),
+    CustomGetPage(name: '/performance', page: () => const PerformancePage()),
   ];
 }
 
