@@ -195,7 +195,7 @@ msix_config:
   publisher: CN=2D6F3928-D371-4F33-B290-536AB3E2315C
   logo_path: assets/images/logo/logo.png
   languages: zh-cn, zh-hans, zh-hans-cn
-  msix_version: 1.1.2.0
+  msix_version: 1.2.0.0
   capabilities: internetClient
   store: true
 
