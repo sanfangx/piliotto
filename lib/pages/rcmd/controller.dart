@@ -13,16 +13,13 @@ class RcmdController extends GetxController {
   final ScrollController scrollController = ScrollController();
   RxBool isLoadingMore = true.obs;
   OverlayEntry? popupDialog;
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
   RxInt crossAxisCount = 2.obs;
-  late bool enableSaveLastData;
   late RxList<Video> videoList;
 
   @override
   void onInit() {
     super.onInit();
-    enableSaveLastData =
-        setting.get(SettingBoxKey.enableSaveLastData, defaultValue: false);
     videoList = <Video>[].obs;
     // 初始计算列数
     updateCrossAxisCount();
@@ -60,12 +57,8 @@ class RcmdController extends GetxController {
         videoList.clear();
         videoList.addAll(videos);
       } else if (type == 'onRefresh') {
-        if (enableSaveLastData) {
-          videoList.insertAll(0, videos);
-        } else {
-          videoList.clear();
-          videoList.addAll(videos);
-        }
+        videoList.clear();
+        videoList.addAll(videos);
       } else if (type == 'onLoad') {
         videoList.addAll(videos);
       }

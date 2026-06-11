@@ -83,23 +83,87 @@ class _WebviewPageState extends State<WebviewPage> {
     ];
   }
 
-  /// 构建加载中状态
-  Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  /// 构建标题 widget
+  ///
+  /// 根据 titleMode 和 subtitleMode 模式动态显示主标题和副标题：
+  /// - 主标题模式：
+  ///   - 'fixed': 显示固定文本
+  ///   - 'webTitle': 显示网页名称
+  /// - 副标题模式：
+  ///   - 'fixed': 显示固定文本
+  ///   - 'webTitle': 显示网页名称
+  ///   - 'webUrl': 显示网页链接
+  ///   - 'none': 无副标题
+  Widget _buildTitle() {
+    final String fixedTitle =
+        widget.appBarTitle ?? _webviewController.pageTitle;
+
+    // 获取主标题内容
+    Widget buildMainTitle() {
+      if (_webviewController.titleMode == 'webTitle') {
+        return Obx(() {
+          final webTitle = _webviewController.webTitle.value;
+          return Text(
+            webTitle.isNotEmpty ? webTitle : fixedTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          );
+        });
+      } else {
+        // fixed 模式
+        return Text(
+          fixedTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        );
+      }
+    }
+
+    // 获取副标题内容
+    Widget? buildSubtitle() {
+      if (_webviewController.subtitleMode == 'none') {
+        return null;
+      }
+
+      return Obx(() {
+        String subtitleText = '';
+        switch (_webviewController.subtitleMode) {
+          case 'fixed':
+            subtitleText = fixedTitle;
+            break;
+          case 'webTitle':
+            subtitleText = _webviewController.webTitle.value;
+            break;
+          case 'webUrl':
+            subtitleText = _webviewController.webUrl.value;
+            break;
+        }
+
+        if (subtitleText.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Text(
+          subtitleText,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        );
+      });
+    }
+
+    // 组合主标题和副标题
+    final subtitle = buildSubtitle();
+    if (subtitle != null) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: AppSpacing.base),
-          Obx(() => Text(
-                '加载中... ${_webviewController.loadProgress.value}%',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              )),
+          buildMainTitle(),
+          subtitle,
         ],
-      ),
-    );
+      );
+    } else {
+      return buildMainTitle();
+    }
   }
 
   /// 构建错误状态
@@ -116,22 +180,37 @@ class _WebviewPageState extends State<WebviewPage> {
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: AppSpacing.base),
-            Text(
-              '加载失败',
-              style: TextStyle(
-                fontSize: AppFontSize.xl,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Obx(() => Text(
-                  _webviewController.errorMessage.value,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            Obx(() {
+              // 解析错误信息（格式：title\nmessage）
+              final errorText = _webviewController.errorMessage.value;
+              final parts = errorText.split('\n');
+              final title = parts.isNotEmpty ? parts[0] : '加载失败';
+              final message =
+                  parts.length > 1 ? parts.sublist(1).join('\n') : '';
+
+              return Column(
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: AppFontSize.xl,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
-                )),
+                  if (message.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            }),
             const SizedBox(height: AppSpacing.lg),
             FilledButton.icon(
               onPressed: _webviewController.retry,
@@ -157,27 +236,23 @@ class _WebviewPageState extends State<WebviewPage> {
             ? AppBar(
                 centerTitle: false,
                 titleSpacing: 0,
-                title: Text(
-                  widget.appBarTitle ?? _webviewController.pageTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
+                title: _buildTitle(),
+                actions: widget.appBarActions ?? _buildDefaultActions(context),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(2),
+                  child: Obx(
+                    () => LinearProgressIndicator(
+                      value: _webviewController.loadProgress.value > 0
+                          ? _webviewController.loadProgress.value / 100
+                          : null,
+                      backgroundColor: Colors.transparent,
+                    ),
+                  ),
                 ),
-                actions:
-                    widget.appBarActions ?? _buildDefaultActions(context),
               )
             : null,
         body: Column(
           children: [
-            Obx(
-              () => AnimatedContainer(
-                curve: Curves.easeInOut,
-                duration: const Duration(milliseconds: 350),
-                height: _webviewController.loadShow.value ? 4 : 0,
-                child: LinearProgressIndicator(
-                  key: ValueKey(_webviewController.loadProgress),
-                  value: _webviewController.loadProgress / 100,
-                ),
-              ),
-            ),
             if (_webviewController.type.value == 'login')
               Container(
                 width: double.infinity,
@@ -187,41 +262,52 @@ class _WebviewPageState extends State<WebviewPage> {
                 child: const Text('登录成功未自动跳转?  请点击右上角「刷新登录状态」'),
               ),
             Expanded(
-              child: Obx(() {
-                // 显示错误状态
-                if (_webviewController.hasError.value) {
-                  return _buildErrorState();
-                }
-
-                // 显示加载中状态（只要正在加载就显示）
-                if (_webviewController.isLoading.value) {
-                  return _buildLoadingState();
-                }
-
-                // 显示 WebView
-                return InAppWebView(
-                  initialSettings: InAppWebViewSettings(
-                    userAgent:
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    javaScriptEnabled: true,
+              child: Stack(
+                children: [
+                  // WebView
+                  InAppWebView(
+                    initialSettings: InAppWebViewSettings(
+                      userAgent: _webviewController.userAgent.isNotEmpty
+                          ? _webviewController.userAgent
+                          : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                      javaScriptEnabled: _webviewController.enableJs,
+                      cacheEnabled: _webviewController.enableCache,
+                      supportZoom: _webviewController.allowZoom,
+                      mediaPlaybackRequiresUserGesture:
+                          !_webviewController.autoPlayMedia,
+                    ),
+                    onWebViewCreated: _webviewController.onWebViewCreated,
+                    onProgressChanged: (controller, progress) {
+                      _webviewController.onProgressChanged(progress);
+                    },
+                    onLoadStart: (controller, url) {
+                      _webviewController.onUrlChanged(url);
+                    },
+                    onLoadStop: (controller, url) {
+                      _webviewController.onLoadStop(url);
+                    },
+                    onTitleChanged: (controller, title) {
+                      _webviewController.onTitleChanged(title);
+                    },
+                    onReceivedError: (controller, request, error) {
+                      _webviewController.onLoadError(request, error);
+                    },
+                    shouldOverrideUrlLoading:
+                        _webviewController.shouldOverrideUrlLoading,
                   ),
-                  onWebViewCreated: _webviewController.onWebViewCreated,
-                  onProgressChanged: (controller, progress) {
-                    _webviewController.onProgressChanged(progress);
-                  },
-                  onLoadStart: (controller, url) {
-                    _webviewController.onUrlChanged(url);
-                  },
-                  onLoadStop: (controller, url) {
-                    _webviewController.onLoadStop(url);
-                  },
-                  onReceivedError: (controller, request, error) {
-                    _webviewController.onLoadError(request, error);
-                  },
-                  shouldOverrideUrlLoading:
-                      _webviewController.shouldOverrideUrlLoading,
-                );
-              }),
+                  // 错误状态覆盖层（使用 AnimatedSwitcher 实现快速渐入渐出）
+                  Obx(() => AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 150), // 快速渐入
+                        reverseDuration:
+                            const Duration(milliseconds: 300), // 标准渐出
+                        switchInCurve: Curves.easeIn,
+                        switchOutCurve: Curves.easeOut,
+                        child: _webviewController.hasError.value
+                            ? _buildErrorState()
+                            : const SizedBox.shrink(),
+                      )),
+                ],
+              ),
             ),
           ],
         ));

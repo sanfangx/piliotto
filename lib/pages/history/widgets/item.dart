@@ -16,7 +16,7 @@ class HistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String heroTag = Utils.makeHeroTag(videoItem.vid);
+    final String heroTag = Utils.makeHeroTag(videoItem.vid, 'video');
 
     return InkWell(
       onTap: () {

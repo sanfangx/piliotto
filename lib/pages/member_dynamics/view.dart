@@ -26,7 +26,7 @@ class _MemberDynamicsPageState extends State<MemberDynamicsPage> {
   void initState() {
     super.initState();
     mid = int.parse(Get.parameters['mid']!);
-    final String heroTag = Utils.makeHeroTag(mid);
+    final String heroTag = Utils.makeHeroTag(mid, 'member');
     _memberDynamicController =
         Get.put(MemberDynamicsController(), tag: heroTag);
     _futureBuilderFuture =

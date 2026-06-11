@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:piliotto/models/user/info.dart';
 
-class GStrorage {
+class GStorage {
   static late final Box<dynamic> userInfo;
   static late final Box<dynamic> historyword;
   static late final Box<dynamic> localCache;
@@ -48,8 +48,6 @@ class GStrorage {
   }
 
   static Future<void> close() async {
-    // user.compact();
-    // user.close();
     userInfo.compact();
     userInfo.close();
     historyword.compact();
@@ -88,10 +86,6 @@ class SettingBoxKey {
       autoPiP = 'autoPiP',
       enableAutoLongPressSpeed = 'enableAutoLongPressSpeed',
       enablePlayerControlAnimation = 'enablePlayerControlAnimation',
-      // 默认音频输出方式
-      defaultAoOutput = 'defaultAoOutput',
-      // 港澳台模式
-      enableGATMode = 'enableGATMode',
 
       // youtube 双击快进快退
       enableQuickDouble = 'enableQuickDouble',
@@ -105,7 +99,6 @@ class SettingBoxKey {
       /// 推荐
       enableRcmdDynamic = 'enableRcmdDynamic',
       defaultRcmdType = 'defaultRcmdType',
-      enableSaveLastData = 'enableSaveLastData',
       minDurationForRcmd = 'minDurationForRcmd',
       minLikeRatioForRecommend = 'minLikeRatioForRecommend',
       exemptFilterForFollowed = 'exemptFilterForFollowed',
@@ -116,16 +109,16 @@ class SettingBoxKey {
       autoUpdate = 'autoUpdate',
       replySortType = 'replySortType',
       defaultDynamicType = 'defaultDynamicType',
-      enableHotKey = 'enableHotKey',
-      enableQuickFav = 'enableQuickFav',
-      enableWordRe = 'enableWordRe',
-      enableSearchWord = 'enableSearchWord',
-      enableSystemProxy = 'enableSystemProxy',
-      enableAi = 'enableAi',
       defaultHomePage = 'defaultHomePage',
       enableRelatedVideo = 'enableRelatedVideo',
       // 开发者模式
-      developerMode = 'developerMode';
+      developerMode = 'developerMode',
+      // 主标题模式 (fixed/webTitle)
+      titleMode = 'titleMode',
+      // 副标题模式 (fixed/webTitle/webUrl/none)
+      subtitleMode = 'subtitleMode',
+      // 全局 JS 注入代码
+      globalJsInjection = 'globalJsInjection';
 
   /// 外观
   static const String themeMode = 'themeMode',

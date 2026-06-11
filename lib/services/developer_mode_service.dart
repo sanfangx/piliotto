@@ -8,7 +8,7 @@ import 'package:piliotto/utils/storage.dart';
 class DeveloperModeService {
   static const String _developerModeKey = 'developerMode';
 
-  final Box _localCache = GStrorage.localCache;
+  final Box _localCache = GStorage.localCache;
 
   /// 检查开发者模式是否启用
   ///

@@ -15,7 +15,7 @@ class LoginUtils {
       final mineCtr = Get.find<MineController>();
       mineCtr.userLogin.value = status;
       if (status) {
-        mineCtr.userInfo.value = await GStrorage.userInfo.get('userInfoCache');
+        mineCtr.userInfo.value = await GStorage.userInfo.get('userInfoCache');
       } else {
         mineCtr.userInfo.value = UserInfoData();
         mineCtr.userStat.value = UserStat();

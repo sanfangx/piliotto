@@ -45,7 +45,7 @@ class _MemberPageState extends State<MemberPage>
   void initState() {
     super.initState();
     mid = int.parse(Get.parameters['mid']!);
-    heroTag = Get.arguments['heroTag'] ?? Utils.makeHeroTag(mid);
+    heroTag = Get.arguments['heroTag'] ?? Utils.makeHeroTag(mid, 'member');
     _memberController = Get.put(MemberController(), tag: heroTag);
     _dynamicsController = Get.put(MemberDynamicsController(), tag: heroTag);
     _favController = Get.put(FavController(), tag: heroTag);

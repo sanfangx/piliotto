@@ -102,12 +102,12 @@ SettingPage (view.dart)
 
 SettingController (controller.dart)
   ├── GStrorage.userInfo (Hive Box) ── 用户登录状态
-  ├── GStrorage.setting (Hive Box)   ── 全局设置持久化
+  ├── GStorage.setting (Hive Box)   ── 全局设置持久化
   ├── GStrorage.localCache (Hive Box)── 本地缓存
   └── LoginUtils.refreshLoginStatus() ── 登录状态刷新
 
 各子页面
-  ├── GStrorage.setting (Hive Box)   ── SettingBoxKey 常量
+  ├── GStorage.setting (Hive Box)   ── SettingBoxKey 常量
   ├── GStrorage.video (Hive Box)     ── VideoBoxKey 常量（播放器相关）
   └── GlobalDataCache()              ── 运行时全局配置缓存
 ```
@@ -145,7 +145,7 @@ SettingController (controller.dart)
 | 依赖 | 来源 | 说明 |
 |------|------|------|
 | `GStrorage.userInfo` | Hive Box | 读取当前登录用户信息 |
-| `GStrorage.setting` | Hive Box | 读写 `SettingBoxKey.*` 持久化设置 |
+| `GStorage.setting` | Hive Box | 读写 `SettingBoxKey.*` 持久化设置 |
 | `GStrorage.localCache` | Hive Box | 读写 `LocalCacheKey.*` 本地缓存 |
 | `LoginUtils.refreshLoginStatus()` | utils/login.dart | 退出登录时刷新全局登录态 |
 
@@ -451,7 +451,7 @@ Widget buildSettingItem(
 ┌────────────────────────────────────────────────────┐
 │              Hive 持久化存储                         │
 │  ┌─────────────────┐  ┌──────────────────────────┐ │
-│  │ GStrorage.setting│  │  GStrorage.video         │ │
+│  │ GStorage.setting│  │  GStrorage.video         │ │
 │  │ (SettingBoxKey.*)│  │  (VideoBoxKey.*)         │ │
 │  └─────────────────┘  └──────────────────────────┘ │
 └────────────────────────────────────────────────────┘
@@ -470,7 +470,7 @@ Widget buildSettingItem(
 
 | 存储 Box | 常量前缀 | 存储内容 | 示例 |
 |----------|----------|----------|------|
-| `GStrorage.setting` | `SettingBoxKey.*` | 全局 UI / 行为设置 | 主题模式、字体大小、开关状态 |
+| `GStorage.setting` | `SettingBoxKey.*` | 全局 UI / 行为设置 | 主题模式、字体大小、开关状态 |
 | `GStrorage.video` | `VideoBoxKey.*` | 播放器相关设置 | 倍速、底部按钮、手势 |
 | `GlobalDataCache()` | 内存单例 | 需要即时生效的缓存 | 图片质量、操作菜单排序 |
 
@@ -514,11 +514,11 @@ void navigateToDanmakuSetting() {
 import 'package:piliotto/utils/storage.dart';
 
 void readSettings() {
-  final themeMode = GStrorage.setting.get(
+  final themeMode = GStorage.setting.get(
     SettingBoxKey.themeMode, 
     defaultValue: 'system',
   );
-  final autoPlay = GStrorage.setting.get(
+  final autoPlay = GStorage.setting.get(
     SettingBoxKey.autoPlayEnable, 
     defaultValue: true,
   );
@@ -533,8 +533,8 @@ void readSettings() {
 }
 
 void updateSettings() async {
-  await GStrorage.setting.put(SettingBoxKey.themeMode, 'dark');
-  await GStrorage.setting.put(SettingBoxKey.autoPlayEnable, false);
+  await GStorage.setting.put(SettingBoxKey.themeMode, 'dark');
+  await GStorage.setting.put(SettingBoxKey.autoPlayEnable, false);
   await GStrorage.video.put(VideoBoxKey.videoSpeed, 1.5);
   
   Get.forceAppUpdate();
@@ -579,7 +579,7 @@ class MySettingPage extends StatelessWidget {
 import 'package:piliotto/utils/storage.dart';
 
 void changeTheme(String themeMode) async {
-  await GStrorage.setting.put(SettingBoxKey.themeMode, themeMode);
+  await GStorage.setting.put(SettingBoxKey.themeMode, themeMode);
   Get.changeThemeMode(
     themeMode == 'dark' 
       ? ThemeMode.dark 
@@ -591,7 +591,7 @@ void changeTheme(String themeMode) async {
 }
 
 void changeThemeColor(Color color) async {
-  await GStrorage.setting.put(SettingBoxKey.themeColor, color.value);
+  await GStorage.setting.put(SettingBoxKey.themeColor, color.value);
   Get.changeTheme(Get.theme.copyWith(primaryColor: color));
   Get.forceAppUpdate();
 }
@@ -605,7 +605,7 @@ void changeThemeColor(Color color) async {
 
 1. 在 `lib/pages/setting/pages/` 下创建新的页面文件和路由
 2. 在对应的一级设置页面（StyleSetting / PlaySetting / ExtraSetting）中添加 `ListTile` 跳转入口
-3. 确保页面正确使用 `GStrorage.setting` 或 `GStrorage.video` 读写数据
+3. 确保页面正确使用 `GStorage.setting` 或 `GStrorage.video` 读写数据
 
 ### 10.2 Widgets 组件使用指南
 

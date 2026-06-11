@@ -128,7 +128,7 @@ class IntroDetail extends StatelessWidget {
         case 2:
           final Color colorSchemePrimary =
               Theme.of(context).colorScheme.primary;
-          final String heroTag = Utils.makeHeroTag(currentDesc.bizId);
+          final String heroTag = Utils.makeHeroTag(currentDesc.bizId, 'member');
           return TextSpan(
             text: '@${currentDesc.rawText}',
             style: TextStyle(color: colorSchemePrimary),

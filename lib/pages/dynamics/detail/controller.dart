@@ -18,7 +18,7 @@ class DynamicDetailController extends GetxController {
   RxInt acount = 0.obs;
   final ScrollController scrollController = ScrollController();
 
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
   final ICommentRepository _commentRepo = Get.find<ICommentRepository>();
 
   Rxn<ReplyItemModel> replyingTo = Rxn<ReplyItemModel>();

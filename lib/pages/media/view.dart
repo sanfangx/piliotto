@@ -230,7 +230,7 @@ class FavFolderItem extends StatelessWidget {
   final int? index;
   @override
   Widget build(BuildContext context) {
-    String heroTag = Utils.makeHeroTag(item!.fid);
+    String heroTag = Utils.makeHeroTag(item!.fid, 'fav');
 
     return Container(
       margin: EdgeInsets.only(left: index == 0 ? 20 : 0, right: 14),

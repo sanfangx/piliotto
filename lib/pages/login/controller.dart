@@ -97,7 +97,7 @@ class LoginPageController extends GetxController {
         uname: 'user_${response.uid}',
       );
 
-      Box userInfoCache = GStrorage.userInfo;
+      Box userInfoCache = GStorage.userInfo;
       await userInfoCache.put('userInfoCache', userInfo);
 
       await _refreshLoginStatus(true, response.avatarUrl);
@@ -128,7 +128,7 @@ class LoginPageController extends GetxController {
         uname: 'user_${response.uid}',
       );
 
-      Box userInfoCache = GStrorage.userInfo;
+      Box userInfoCache = GStorage.userInfo;
       await userInfoCache.put('userInfoCache', userInfo);
 
       await _refreshLoginStatus(true, response.avatarUrl);
@@ -147,7 +147,7 @@ class LoginPageController extends GetxController {
       final mineCtr = Get.find<MineController>();
       mineCtr.userLogin.value = status;
       if (status) {
-        mineCtr.userInfo.value = await GStrorage.userInfo.get('userInfoCache');
+        mineCtr.userInfo.value = await GStorage.userInfo.get('userInfoCache');
       }
 
       HomeController homeCtr = Get.find<HomeController>();

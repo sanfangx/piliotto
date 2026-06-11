@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   final HomeController _homeController = Get.put(HomeController());
   List videoList = [];
-  late Stream<bool> stream;
+  late Stream<bool> searchBarVisibilityStream;
 
   @override
   bool get wantKeepAlive => true;
@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    stream = _homeController.searchBarStream.stream;
+    searchBarVisibilityStream = _homeController.searchBarStream.stream;
   }
 
   @override
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage>
         children: [
           CustomAppBar(
             stream: _homeController.hideSearchBar
-                ? stream
+                ? searchBarVisibilityStream
                 : StreamController<bool>.broadcast().stream,
             ctr: _homeController,
             callback: showUserBottomSheet,

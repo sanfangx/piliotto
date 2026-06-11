@@ -14,7 +14,7 @@ class NavigationBarSetPage extends StatefulWidget {
 }
 
 class _NavigationbarSetPageState extends State<NavigationBarSetPage> {
-  Box settingStorage = GStrorage.setting;
+  Box<dynamic> setting = GStorage.setting;
   late List defaultNavTabs;
   late List<int> navBarSort;
 
@@ -23,7 +23,7 @@ class _NavigationbarSetPageState extends State<NavigationBarSetPage> {
     super.initState();
     defaultNavTabs = defaultNavigationBars;
     navBarSort =
-        settingStorage.get(SettingBoxKey.navBarSort, defaultValue: [0, 1, 3]);
+        setting.get(SettingBoxKey.navBarSort, defaultValue: [0, 1, 3]);
 
     // 自动添加新页面到导航栏
     for (var item in defaultNavigationBars) {
@@ -54,7 +54,7 @@ class _NavigationbarSetPageState extends State<NavigationBarSetPage> {
         .where((i) => navBarSort.contains(i['id']))
         .map<int>((i) => i['id'])
         .toList();
-    settingStorage.put(SettingBoxKey.navBarSort, sortedTabbar);
+    setting.put(SettingBoxKey.navBarSort, sortedTabbar);
     SmartDialog.showToast('保存成功，下次启动时生效');
   }
 

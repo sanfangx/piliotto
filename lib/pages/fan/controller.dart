@@ -10,7 +10,7 @@ final _logger = getLogger();
 
 class FanController extends GetxController {
   final IUserRepository _userRepo = Get.find<IUserRepository>();
-  Box userInfoCache = GStrorage.userInfo;
+  Box userInfoCache = GStorage.userInfo;
   int offset = 0;
   final int num = 12; // API 限制每次最多获取 12 条
   RxList<FollowingUser> fanList = <FollowingUser>[].obs;

@@ -7,7 +7,7 @@ import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/pages/home/controller.dart';
 import 'package:piliotto/utils/storage.dart';
 
-Box userInfoCache = GStrorage.userInfo;
+Box userInfoCache = GStorage.userInfo;
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});

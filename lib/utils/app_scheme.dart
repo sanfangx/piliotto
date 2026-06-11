@@ -82,7 +82,7 @@ class PiliSchame {
   static Future<void> _videoPush(int vid) async {
     SmartDialog.showLoading<dynamic>(msg: '获取中...');
     try {
-      final String heroTag = Utils.makeHeroTag(vid);
+      final String heroTag = Utils.makeHeroTag(vid, 'video');
       SmartDialog.dismiss<dynamic>().then(
         (e) => Get.toNamed<dynamic>('/video?vid=$vid',
             arguments: <String, String?>{

@@ -34,7 +34,7 @@ class _BlogCommentInputState extends State<BlogCommentInput> {
   @override
   void initState() {
     super.initState();
-    _token = GStrorage.setting.get('ottohub_token');
+    _token = GStorage.setting.get('ottohub_token');
     _controller.addListener(() {
       setState(() {
         _hasText = _controller.text.isNotEmpty;

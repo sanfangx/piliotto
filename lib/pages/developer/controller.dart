@@ -17,13 +17,14 @@ import 'package:piliotto/utils/storage.dart';
 /// - 开发者模式开关
 class DeveloperController extends GetxController {
   /// 设置存储
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
 
   /// 系统信息服务
   final SystemInfoService _systemInfoService = SystemInfoService();
 
   /// 系统信息
-  final RxMap<String, Map<String, dynamic>> systemInfo = <String, Map<String, dynamic>>{}.obs;
+  final RxMap<String, Map<String, dynamic>> systemInfo =
+      <String, Map<String, dynamic>>{}.obs;
 
   /// 是否正在加载系统信息
   final RxBool isLoadingSystemInfo = false.obs;
@@ -34,20 +35,34 @@ class DeveloperController extends GetxController {
   /// 路由参数输入控制器
   final TextEditingController routeParamsController = TextEditingController();
 
-  /// WebView URL 输入控制器
-  final TextEditingController webviewUrlController = TextEditingController();
+  /// 浏览器 URL 输入控制器
+  final TextEditingController browserUrlController = TextEditingController();
 
-  /// WebView 页面标题输入控制器
-  final TextEditingController webviewTitleController = TextEditingController();
+  /// 浏览器页面标题输入控制器
+  final TextEditingController browserTitleController = TextEditingController();
 
-  /// WebView 页面类型输入控制器
-  final TextEditingController webviewTypeController = TextEditingController();
+  /// 浏览器主标题模式控制器
+  final TextEditingController browserTitleModeController =
+      TextEditingController();
+
+  /// 浏览器副标题模式控制器
+  final TextEditingController browserSubtitleModeController =
+      TextEditingController();
+
+  /// 浏览器 JS 注入模式控制器
+  final TextEditingController browserJsInjectionModeController =
+      TextEditingController();
+
+  /// 浏览器调用时 JS 代码控制器
+  final TextEditingController browserJsInjectionController =
+      TextEditingController();
+
+  /// 全局 JS 注入代码控制器
+  final TextEditingController globalJsInjectionController =
+      TextEditingController();
 
   /// 开发者模式是否启用
   RxBool developerModeEnabled = true.obs;
-
-  /// 是否显示 AppBar
-  RxBool webviewShowAppBar = true.obs;
 
   @override
   void onInit() {
@@ -58,15 +73,25 @@ class DeveloperController extends GetxController {
 
     // 加载系统信息
     loadSystemInfo();
+
+    // 加载全局 JS 注入代码
+    globalJsInjectionController.text = setting.get(
+      SettingBoxKey.globalJsInjection,
+      defaultValue: '',
+    );
   }
 
   @override
   void onClose() {
     routePathController.dispose();
     routeParamsController.dispose();
-    webviewUrlController.dispose();
-    webviewTitleController.dispose();
-    webviewTypeController.dispose();
+    browserUrlController.dispose();
+    browserTitleController.dispose();
+    browserTitleModeController.dispose();
+    browserSubtitleModeController.dispose();
+    browserJsInjectionModeController.dispose();
+    browserJsInjectionController.dispose();
+    globalJsInjectionController.dispose();
     super.onClose();
   }
 
@@ -103,7 +128,7 @@ class DeveloperController extends GetxController {
   Future<void> clearAllStorage() async {
     try {
       // 清除 Hive 所有 box
-      await GStrorage.setting.clear();
+      await GStorage.setting.clear();
       SmartDialog.showToast('存储已清除');
       // 重新加载系统信息
       await loadSystemInfo();
@@ -116,7 +141,7 @@ class DeveloperController extends GetxController {
   Future<void> resetSettings() async {
     try {
       // 清除设置
-      await GStrorage.setting.clear();
+      await GStorage.setting.clear();
       SmartDialog.showToast('设置已重置');
     } catch (e) {
       SmartDialog.showToast('重置设置失败: $e');
@@ -151,7 +176,8 @@ class DeveloperController extends GetxController {
       // 执行跳转
       if (arguments != null) {
         // 将 Map<String, dynamic> 转换为 Map<String, String>
-        final stringParams = arguments.map((key, value) => MapEntry(key, value.toString()));
+        final stringParams =
+            arguments.map((key, value) => MapEntry(key, value.toString()));
         Get.toNamed(path, parameters: stringParams);
       } else {
         Get.toNamed(path);
@@ -159,42 +185,6 @@ class DeveloperController extends GetxController {
     } catch (e) {
       SmartDialog.showToast('路由跳转失败: $e');
     }
-  }
-
-  /// 打开 WebView 页面
-  void openWebview() {
-    String url = webviewUrlController.text.trim();
-    if (url.isEmpty) {
-      SmartDialog.showToast('请输入 URL');
-      return;
-    }
-
-    // 如果没有协议前缀，添加 https://
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://$url';
-    }
-
-    // 构建参数
-    final String pageTitle = webviewTitleController.text.trim().isEmpty
-        ? '开发者浏览器'
-        : webviewTitleController.text.trim();
-    final String type = webviewTypeController.text.trim();
-
-    // 构建路由参数
-    final Map<String, String> parameters = {
-      'url': url,
-      'pageTitle': pageTitle,
-    };
-    if (type.isNotEmpty) {
-      parameters['type'] = type;
-    }
-
-    // 构建路由参数（showAppBar 通过 arguments 传递）
-    final Map<String, dynamic> arguments = {
-      'showAppBar': webviewShowAppBar.value,
-    };
-
-    Get.toNamed('/webview', parameters: parameters, arguments: arguments);
   }
 
   /// 打开网络调试页面
@@ -205,6 +195,54 @@ class DeveloperController extends GetxController {
   /// 打开性能分析页面
   void openPerformance() {
     Get.toNamed('/performance');
+  }
+
+  /// 打开浏览器测试
+  void openBrowserTest() {
+    final String url = browserUrlController.text.trim();
+    if (url.isEmpty) {
+      SmartDialog.showToast('请输入 URL');
+      return;
+    }
+
+    // 格式化 URL（如果没有协议则添加 https://）
+    String formattedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      formattedUrl = 'https://$url';
+    }
+
+    final String title = browserTitleController.text.trim();
+    final String titleMode = browserTitleModeController.text.trim();
+    final String subtitleMode = browserSubtitleModeController.text.trim();
+    final String jsInjectionMode = browserJsInjectionModeController.text.trim();
+    final String jsInjection = browserJsInjectionController.text.trim();
+
+    // 构建参数
+    final Map<String, dynamic> arguments = {};
+    if (titleMode.isNotEmpty) {
+      arguments['titleMode'] = titleMode;
+    }
+    if (subtitleMode.isNotEmpty) {
+      arguments['subtitleMode'] = subtitleMode;
+    }
+    if (jsInjectionMode.isNotEmpty) {
+      arguments['jsInjectionMode'] = jsInjectionMode;
+    }
+    if (jsInjection.isNotEmpty) {
+      arguments['jsInjection'] = jsInjection;
+    }
+
+    Get.toNamed(
+      '/webview?url=${Uri.encodeComponent(formattedUrl)}&pageTitle=${Uri.encodeComponent(title)}',
+      arguments: arguments.isNotEmpty ? arguments : null,
+    );
+  }
+
+  /// 保存全局 JS 注入代码
+  Future<void> saveGlobalJsInjection() async {
+    final String jsCode = globalJsInjectionController.text;
+    await setting.put(SettingBoxKey.globalJsInjection, jsCode);
+    SmartDialog.showToast('已保存');
   }
 
   /// 获取当前路由栈信息

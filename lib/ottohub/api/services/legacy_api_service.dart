@@ -16,7 +16,7 @@ class LegacyApiService {
   static const String _tokenKey = 'ottohub_token';
 
   static String? getToken() {
-    return GStrorage.setting.get(_tokenKey);
+    return GStorage.setting.get(_tokenKey);
   }
 
   static void requireLogin() {

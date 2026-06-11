@@ -28,7 +28,7 @@ class FavVideoCardH extends StatelessWidget {
   Widget build(BuildContext context) {
     int id = videoItem.id;
     String bvid = videoItem.bvid ?? IdUtils.av2bv(id);
-    String heroTag = Utils.makeHeroTag(id);
+    String heroTag = Utils.makeHeroTag(id, 'video');
     return InkWell(
       onTap: () async {
         Map<String, String> parameters = {

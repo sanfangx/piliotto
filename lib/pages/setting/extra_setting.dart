@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:piliotto/models/common/reply_sort_type.dart';
 import 'package:piliotto/pages/setting/widgets/select_dialog.dart';
 import 'package:piliotto/utils/storage.dart';
 
+import 'controller.dart';
 import 'widgets/switch_item.dart';
 
 class ExtraSetting extends StatefulWidget {
@@ -14,8 +16,9 @@ class ExtraSetting extends StatefulWidget {
 }
 
 class _ExtraSettingState extends State<ExtraSetting> {
-  Box setting = GStrorage.setting;
-  late dynamic defaultReplySort;
+  final SettingController settingController = Get.find<SettingController>();
+  Box<dynamic> setting = GStorage.setting;
+  late int defaultReplySort;
 
   @override
   void initState() {
@@ -46,11 +49,46 @@ class _ExtraSettingState extends State<ExtraSetting> {
       ),
       body: ListView(
         children: [
+          Obx(
+            () => ListTile(
+              enableFeedback: true,
+              onTap: () => settingController.onOpenFeedBack(),
+              title: const Text('震动反馈'),
+              subtitle: Text('请确定手机设置中已开启震动反馈', style: subTitleStyle),
+              trailing: Transform.scale(
+                alignment: Alignment.centerRight,
+                scale: 0.8,
+                child: Switch(
+                  thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+                    (Set<WidgetState> states) {
+                      if (states.isNotEmpty && states.first == WidgetState.selected) {
+                        return const Icon(Icons.done);
+                      }
+                      return null;
+                    },
+                  ),
+                  value: settingController.feedBackEnable.value,
+                  onChanged: (value) => settingController.onOpenFeedBack(),
+                ),
+              ),
+            ),
+          ),
           const SetSwitchItem(
             title: '相关视频推荐',
             subTitle: '视频详情页推荐相关视频',
             setKey: SettingBoxKey.enableRelatedVideo,
             defaultVal: true,
+          ),
+          ListTile(
+            dense: false,
+            title: Text('推荐过滤设置', style: titleStyle),
+            subtitle: Text(
+              '过滤推荐视频的最小时长和点赞率',
+              style: subTitleStyle,
+            ),
+            onTap: () {
+              Get.toNamed('/recommendFilterSetting');
+            },
           ),
           ListTile(
             dense: false,

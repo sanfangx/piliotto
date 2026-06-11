@@ -18,7 +18,7 @@ class MemberController extends GetxController {
   late Map userStat;
   RxString face = ''.obs;
   String? heroTag;
-  Box userInfoCache = GStrorage.userInfo;
+  Box userInfoCache = GStorage.userInfo;
   late int ownerMid;
   RxList<VListItemModel> archiveList = <VListItemModel>[].obs;
   RxBool isLoadingArchive = false.obs;

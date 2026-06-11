@@ -472,7 +472,7 @@ final response = await _videoRepo.getRandomVideos(num: 30);  // 改为 30
 将 `enableMYBar` 设为 `false` 以使用 Material 2 的 `BottomNavigationBar`：
 
 ```dart
-Box setting = GStrorage.setting;
+Box setting = GStorage.setting;
 bool enableMYBar = false;  // 强制使用 BottomNavigationBar
 ```
 

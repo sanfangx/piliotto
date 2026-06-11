@@ -52,7 +52,7 @@ class VideoCardH extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final videoData = _videoData;
-    final String heroTag = Utils.makeHeroTag(videoData.videoId);
+    final String heroTag = Utils.makeHeroTag(videoData.videoId, 'video');
     return InkWell(
       onTap: () async {
         Get.toNamed('/video?vid=${videoData.videoId}', arguments: {

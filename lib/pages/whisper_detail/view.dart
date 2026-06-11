@@ -41,7 +41,7 @@ class _WhisperDetailPageState extends State<WhisperDetailPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userInfo = GStrorage.userInfo.get('userInfoCache');
+    final userInfo = GStorage.userInfo.get('userInfoCache');
     final myUid = userInfo?.mid ?? 0;
     final myAvatar = userInfo?.face;
 

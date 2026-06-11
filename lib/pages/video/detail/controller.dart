@@ -50,10 +50,10 @@ class VideoDetailController extends GetxController
   RxBool isShowCover = true.obs;
 
   /// 本地存储
-  Box userInfoCache = GStrorage.userInfo;
-  Box localCache = GStrorage.localCache;
-  Box setting = GStrorage.setting;
-  Box videoStorage = GStrorage.video;
+  Box userInfoCache = GStorage.userInfo;
+  Box localCache = GStorage.localCache;
+  Box setting = GStorage.setting;
+  Box videoStorage = GStorage.video;
 
   // 评论id 请求楼中楼评论使用
   int fRpid = 0;

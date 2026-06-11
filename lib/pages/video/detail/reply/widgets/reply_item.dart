@@ -18,7 +18,7 @@ import 'package:piliotto/utils/storage.dart';
 import 'package:piliotto/utils/utils.dart';
 import 'reply_save.dart';
 
-Box setting = GStrorage.setting;
+Box setting = GStorage.setting;
 
 class ReplyItem extends StatefulWidget {
   const ReplyItem({
@@ -155,7 +155,7 @@ class _ReplyItemState extends State<ReplyItem> {
   }
 
   Widget content(BuildContext context) {
-    final String heroTag = Utils.makeHeroTag(widget.replyItem!.mid);
+    final String heroTag = Utils.makeHeroTag(widget.replyItem!.mid, 'member');
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     TextTheme textTheme = Theme.of(context).textTheme;
     return Column(

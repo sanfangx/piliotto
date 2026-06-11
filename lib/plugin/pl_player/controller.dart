@@ -21,9 +21,9 @@ import 'package:status_bar_control_plus/status_bar_control_plus.dart';
 import 'package:universal_platform/universal_platform.dart';
 import '../../services/loggeer.dart';
 
-Box videoStorage = GStrorage.video;
-Box setting = GStrorage.setting;
-Box localCache = GStrorage.localCache;
+Box videoStorage = GStorage.video;
+Box setting = GStorage.setting;
+Box localCache = GStorage.localCache;
 
 class PlPlayerController {
   Player? _videoPlayerController;

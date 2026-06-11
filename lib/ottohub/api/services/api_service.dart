@@ -45,8 +45,6 @@ class ApiService {
     // 初始化网络调试服务（默认禁用，可通过开发者选项启用）
     try {
       final networkDebugService = Get.put(NetworkDebugService());
-      // 默认禁用，避免生产环境性能影响
-      networkDebugService.isEnabled.value = false;
       _dio.interceptors.add(NetworkDebugInterceptor(networkDebugService));
     } catch (e) {
       // 忽略初始化失败
@@ -83,15 +81,15 @@ class ApiService {
   }
 
   static void setToken(String token) {
-    GStrorage.setting.put(_tokenKey, token);
+    GStorage.setting.put(_tokenKey, token);
   }
 
   static String? getToken() {
-    return GStrorage.setting.get(_tokenKey);
+    return GStorage.setting.get(_tokenKey);
   }
 
   static void clearToken() {
-    GStrorage.setting.delete(_tokenKey);
+    GStorage.setting.delete(_tokenKey);
   }
 
   static String _getFriendlyErrorMessage(dio.DioException e) {
@@ -144,9 +142,13 @@ class ApiService {
         requireToken: requireToken,
         skipToken: skipToken,
       );
-    } on ApiException {
+    } on ApiException catch (e) {
+      final logger = getLogger();
+      logger.e('safeRequest ApiException: $endpoint - ${e.message}');
       return null;
     } catch (e) {
+      final logger = getLogger();
+      logger.e('safeRequest unexpected error: $endpoint - $e');
       return null;
     }
   }

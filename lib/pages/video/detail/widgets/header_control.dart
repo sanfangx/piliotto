@@ -47,8 +47,8 @@ class _HeaderControlState extends State<HeaderControl> {
   static const TextStyle subTitleStyle = TextStyle(fontSize: AppFontSize.sm);
   static const TextStyle titleStyle = TextStyle(fontSize: AppFontSize.base);
   Size get preferredSize => const Size(double.infinity, kToolbarHeight);
-  final Box<dynamic> localCache = GStrorage.localCache;
-  final Box<dynamic> videoStorage = GStrorage.video;
+  final Box<dynamic> localCache = GStorage.localCache;
+  final Box<dynamic> videoStorage = GStorage.video;
   late List<double> speedsList;
   double buttonSpace = 8;
   RxBool isFullScreen = false.obs;
@@ -502,7 +502,7 @@ class _HeaderControlState extends State<HeaderControl> {
   }
 
   void _saveDanmakuStatus() {
-    final setting = GStrorage.setting;
+    final setting = GStorage.setting;
     setting.put(
         SettingBoxKey.enableShowDanmaku, widget.controller!.isOpenDanmu.value);
   }

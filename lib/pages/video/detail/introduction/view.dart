@@ -100,8 +100,8 @@ class _VideoInfoState extends State<VideoInfo>
   late String heroTag;
   late final VideoIntroController videoIntroController;
   VideoDetailController? videoDetailCtr;
-  final Box<dynamic> localCache = GStrorage.localCache;
-  final Box<dynamic> setting = GStrorage.setting;
+  final Box<dynamic> localCache = GStorage.localCache;
+  final Box<dynamic> setting = GStorage.setting;
   late double sheetHeight;
   late int mid;
   late String memberHeroTag;
@@ -154,7 +154,7 @@ class _VideoInfoState extends State<VideoInfo>
     feedBack();
     if (widget.videoDetail.uid != null) {
       mid = widget.videoDetail.uid!;
-      memberHeroTag = Utils.makeHeroTag(mid);
+      memberHeroTag = Utils.makeHeroTag(mid, 'member');
       String face = widget.videoDetail.avatarUrl ?? '';
       Get.toNamed('/member?mid=$mid',
           arguments: {'face': face, 'heroTag': memberHeroTag});
@@ -249,7 +249,7 @@ class _VideoInfoState extends State<VideoInfo>
                 onTap: () {
                   if (widget.videoDetail.uid != null) {
                     mid = widget.videoDetail.uid!;
-                    memberHeroTag = Utils.makeHeroTag(mid);
+                    memberHeroTag = Utils.makeHeroTag(mid, 'member');
                     String face = widget.videoDetail.avatarUrl ?? '';
                     Get.toNamed('/member?mid=$mid',
                         arguments: {'face': face, 'heroTag': memberHeroTag});

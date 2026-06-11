@@ -27,21 +27,20 @@ class SetSwitchItem extends StatefulWidget {
 }
 
 class _SetSwitchItemState extends State<SetSwitchItem> {
-  // ignore: non_constant_identifier_names
-  Box Setting = GStrorage.setting;
+  Box<dynamic> setting = GStorage.setting;
   late bool val;
 
   @override
   void initState() {
     super.initState();
-    val = Setting.get(widget.setKey, defaultValue: widget.defaultVal ?? false);
+    val = setting.get(widget.setKey, defaultValue: widget.defaultVal ?? false);
   }
 
   void switchChange(bool? value) async {
     val = value ?? !val;
-    await Setting.put(widget.setKey, val);
+    await setting.put(widget.setKey, val);
     if (widget.setKey == SettingBoxKey.autoUpdate && value == true) {
-      Utils.checkUpdata();
+      Utils.checkUpdate();
     }
     if (widget.callFn != null) {
       widget.callFn!.call(val);

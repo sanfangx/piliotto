@@ -8,7 +8,7 @@ import 'package:piliotto/utils/storage.dart';
 class MediaController extends GetxController {
   final IVideoRepository _videoRepo = Get.find<IVideoRepository>();
   Rx<FavFolderData> favFolderData = FavFolderData().obs;
-  Box userInfoCache = GStrorage.userInfo;
+  Box userInfoCache = GStorage.userInfo;
   RxBool userLogin = false.obs;
   List list = [
     {

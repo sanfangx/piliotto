@@ -79,8 +79,8 @@ class NetworkDebugService extends GetxService {
   /// 网络请求日志列表
   final RxList<NetworkLog> logs = <NetworkLog>[].obs;
 
-  /// 是否启用网络调试
-  final RxBool isEnabled = true.obs;
+  /// 是否启用网络调试（默认禁用，避免生产环境性能影响）
+  final RxBool isEnabled = false.obs;
 
   /// 过滤类型：all, success, error, pending
   final RxString filterType = 'all'.obs;

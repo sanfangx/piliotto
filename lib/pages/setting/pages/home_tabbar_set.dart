@@ -12,7 +12,7 @@ class TabbarSetPage extends StatefulWidget {
 }
 
 class _TabbarSetPageState extends State<TabbarSetPage> {
-  Box settingStorage = GStrorage.setting;
+  Box<dynamic> setting = GStorage.setting;
   late List defaultTabs;
   late List<String> tabbarSort;
 
@@ -20,7 +20,7 @@ class _TabbarSetPageState extends State<TabbarSetPage> {
   void initState() {
     super.initState();
     defaultTabs = tabsConfig;
-    tabbarSort = settingStorage
+    tabbarSort = setting
         .get(SettingBoxKey.tabbarSort, defaultValue: ['rcmd', 'hot']);
     // 对 tabData 进行排序
     defaultTabs.sort((a, b) {
@@ -40,7 +40,7 @@ class _TabbarSetPageState extends State<TabbarSetPage> {
         .where((i) => tabbarSort.contains((i['type'] as TabType).id))
         .map<String>((i) => (i['type'] as TabType).id)
         .toList();
-    settingStorage.put(SettingBoxKey.tabbarSort, sortedTabbar);
+    setting.put(SettingBoxKey.tabbarSort, sortedTabbar);
     SmartDialog.showToast('保存成功，下次启动时生效');
   }
 

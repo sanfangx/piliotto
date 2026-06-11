@@ -20,7 +20,7 @@ Future<VideoPlayerServiceHandler> initAudioService() async {
 
 class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   static final List<MediaItem> _item = [];
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
   bool enableBackgroundPlay = false;
 
   VideoPlayerServiceHandler() {

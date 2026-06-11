@@ -15,12 +15,12 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
   late TabController tabController;
   late List tabsCtrList;
   late List<Widget> tabsPageList;
-  Box userInfoCache = GStrorage.userInfo;
-  Box settingStorage = GStrorage.setting;
+  Box userInfoCache = GStorage.userInfo;
+  Box settingStorage = GStorage.setting;
   RxBool userLogin = false.obs;
   RxString userFace = ''.obs;
   dynamic userInfo;
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
   late final StreamController<bool> searchBarStream =
       StreamController<bool>.broadcast();
   late bool hideSearchBar;
@@ -37,9 +37,7 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
     userFace.value = userInfo != null ? userInfo.face : '';
     hideSearchBar =
         setting.get(SettingBoxKey.hideSearchBar, defaultValue: false);
-    if (setting.get(SettingBoxKey.enableSearchWord, defaultValue: true)) {
-      searchDefault();
-    }
+    searchDefault();
     enableGradientBg =
         setting.get(SettingBoxKey.enableGradientBg, defaultValue: true);
     // 进行tabs配置

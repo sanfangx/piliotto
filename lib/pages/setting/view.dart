@@ -8,7 +8,7 @@ class SettingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingController settingController = Get.put(SettingController());
+    final SettingController settingController = Get.find<SettingController>();
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     Widget buildSettingItem(
@@ -73,6 +73,12 @@ class SettingPage extends StatelessWidget {
             '更多应用配置选项',
             () => Get.toNamed('/extraSetting'),
           ),
+          buildSettingItem(
+            Icons.web_outlined,
+            '浏览器设置',
+            '浏览器相关配置选项',
+            () => Get.toNamed('/browserSetting'),
+          ),
           Obx(
             () => Visibility(
               visible: settingController.userLogin.value,
@@ -83,6 +89,12 @@ class SettingPage extends StatelessWidget {
                 () => settingController.loginOut(),
               ),
             ),
+          ),
+          buildSettingItem(
+            Icons.privacy_tip_outlined,
+            '隐私设置',
+            '黑名单和隐私相关',
+            () => Get.toNamed('/privacySetting'),
           ),
           buildSettingItem(
             Icons.info_outlined,

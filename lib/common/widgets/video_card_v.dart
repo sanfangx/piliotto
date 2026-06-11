@@ -34,7 +34,7 @@ class VideoCardV extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String heroTag = Utils.makeHeroTag(videoItem.vid.toString());
+    final String heroTag = Utils.makeHeroTag(videoItem.vid, 'video');
 
     return InkWell(
       onTap: () => onPushDetail(heroTag),

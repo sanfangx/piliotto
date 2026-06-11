@@ -14,7 +14,7 @@ class StaffUpItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String heroTag = Utils.makeHeroTag(item.mid);
+    final String heroTag = Utils.makeHeroTag(item.mid, 'member');
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,

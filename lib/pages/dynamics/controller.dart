@@ -53,14 +53,14 @@ class DynamicsController extends GetxController {
   ];
   bool flag = false;
   RxInt initialValue = 0.obs;
-  Box userInfoCache = GStrorage.userInfo;
+  Box userInfoCache = GStorage.userInfo;
   RxBool userLogin = false.obs;
   dynamic userInfo;
   final Map<String, RxBool> tabLoadingStates = {
     'latest': false.obs,
     'popular': false.obs,
   };
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
 
   RxString currentTab = 'latest'.obs;
   final Map<String, List<DynamicItemModel>> _tabDataCache = {
@@ -88,7 +88,7 @@ class DynamicsController extends GetxController {
 
   @override
   void onInit() {
-    _layoutSettings = WaterfallLayoutSettings(GStrorage.setting);
+    _layoutSettings = WaterfallLayoutSettings(GStorage.setting);
     userInfo = userInfoCache.get('userInfoCache');
     userLogin.value = userInfo != null;
     super.onInit();

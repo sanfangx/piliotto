@@ -25,7 +25,7 @@ class _MemberArchivePageState extends State<MemberArchivePage> {
   void initState() {
     super.initState();
     mid = int.parse(Get.parameters['mid']!);
-    final String heroTag = Utils.makeHeroTag(mid);
+    final String heroTag = Utils.makeHeroTag(mid, 'member');
     _memberArchivesController =
         Get.put(MemberArchiveController(), tag: heroTag);
     _futureBuilderFuture = _memberArchivesController.getMemberArchive('init');

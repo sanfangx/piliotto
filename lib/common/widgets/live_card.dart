@@ -14,7 +14,7 @@ class LiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String heroTag = Utils.makeHeroTag(liveItem.roomid);
+    final String heroTag = Utils.makeHeroTag(liveItem.roomid, 'live');
 
     return Card(
       elevation: 0,

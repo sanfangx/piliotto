@@ -12,7 +12,7 @@ class BottomControlSetPage extends StatefulWidget {
 
 class _BottomControlSetPageState extends State<BottomControlSetPage>
     with SingleTickerProviderStateMixin {
-  final Box _videoStorage = GStrorage.video;
+  final Box<dynamic> _videoSetting = GStorage.video;
   late TabController _tabController;
 
   late List<BottomControlType> _halfScreenList;
@@ -55,9 +55,9 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
 
   void _loadLists() {
     final halfScreenCodes =
-        _videoStorage.get(VideoBoxKey.halfScreenBottomList)?.cast<String>();
+        _videoSetting.get(VideoBoxKey.halfScreenBottomList)?.cast<String>();
     final fullScreenCodes =
-        _videoStorage.get(VideoBoxKey.fullScreenBottomList)?.cast<String>();
+        _videoSetting.get(VideoBoxKey.fullScreenBottomList)?.cast<String>();
 
     _halfScreenList = BottomControlTypeExtension.fromCodeList(halfScreenCodes);
     if (_halfScreenList.isEmpty) {
@@ -71,11 +71,11 @@ class _BottomControlSetPageState extends State<BottomControlSetPage>
   }
 
   void _saveLists() {
-    _videoStorage.put(
+    _videoSetting.put(
       VideoBoxKey.halfScreenBottomList,
       BottomControlTypeExtension.toCodeList(_halfScreenList),
     );
-    _videoStorage.put(
+    _videoSetting.put(
       VideoBoxKey.fullScreenBottomList,
       BottomControlTypeExtension.toCodeList(_fullScreenList),
     );

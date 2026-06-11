@@ -1,6 +1,5 @@
 import 'dart:io';
 
-// import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -50,11 +49,7 @@ void main() async {
   if (UniversalPlatform.isDesktop) {
     await windowManager.ensureInitialized();
     const windowOptions = WindowOptions(
-      // size: Size(400, 740),
-      // Size: Size(1280, 720),
-      // minimumSize: Size(640, 480),
       center: true,
-      // backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.normal,
       title: 'PiliOtto',
@@ -67,7 +62,7 @@ void main() async {
 
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  await GStrorage.init();
+  await GStorage.init();
   clearLogs();
 
   Get.put<IVideoRepository>(OttohubVideoRepository());
@@ -93,19 +88,6 @@ void main() async {
     },
   );
 
-  // // 小白条、导航栏沉浸
-  // if (Platform.isAndroid) {
-  //   final androidInfo = await DeviceInfoPlugin().androidInfo;
-  //   if (androidInfo.version.sdkInt >= 29) {
-  //     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  //   }
-  //   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-  //     systemNavigationBarColor: Colors.transparent,
-  //     systemNavigationBarDividerColor: Colors.transparent,
-  //     statusBarColor: Colors.transparent,
-  //   ));
-  // }
-
   PiliSchame.init();
   await GlobalDataCache().initialize();
 }
@@ -119,13 +101,15 @@ class MyApp extends StatelessWidget {
       if (setting.isOpen) {
         return setting.get(key, defaultValue: defaultValue) ?? defaultValue;
       }
-    } catch (_) {}
+    } catch (e, stackTrace) {
+      getLogger().e('_getSetting 获取设置失败: key=$key', error: e, stackTrace: stackTrace);
+    }
     return defaultValue;
   }
 
   @override
   Widget build(BuildContext context) {
-    Box setting = GStrorage.setting;
+    Box setting = GStorage.setting;
     // 主题色
     Color defaultColor =
         colorThemeTypes[_getSetting(setting, SettingBoxKey.customColor, 0)]

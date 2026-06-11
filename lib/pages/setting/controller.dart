@@ -13,9 +13,9 @@ import '../main/index.dart';
 import 'widgets/select_dialog.dart';
 
 class SettingController extends GetxController {
-  Box userInfoCache = GStrorage.userInfo;
-  Box setting = GStrorage.setting;
-  Box localCache = GStrorage.localCache;
+  Box<dynamic> userInfoCache = GStorage.userInfo;
+  Box<dynamic> setting = GStorage.setting;
+  Box<dynamic> localCache = GStorage.localCache;
 
   final DeveloperModeService _developerModeService = DeveloperModeService();
 
@@ -24,7 +24,7 @@ class SettingController extends GetxController {
   RxDouble toastOpacity = (1.0).obs;
   RxInt picQuality = 10.obs;
   Rx<ThemeType> themeType = ThemeType.system.obs;
-  dynamic userInfo;
+  Object? userInfo;
   Rx<DynamicBadgeMode> dynamicBadgeType = DynamicBadgeMode.number.obs;
   RxInt defaultHomePage = 0.obs;
   RxBool isDeveloperMode = false.obs;
@@ -32,22 +32,62 @@ class SettingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    userInfo = userInfoCache.get('userInfoCache');
-    userLogin.value = userInfo != null;
-    feedBackEnable.value =
-        setting.get(SettingBoxKey.feedBackEnable, defaultValue: false);
-    toastOpacity.value =
-        setting.get(SettingBoxKey.defaultToastOp, defaultValue: 1.0);
-    picQuality.value =
-        setting.get(SettingBoxKey.defaultPicQa, defaultValue: 10);
-    themeType.value = ThemeType.values[setting.get(SettingBoxKey.themeMode,
-        defaultValue: ThemeType.system.code)];
-    dynamicBadgeType.value = DynamicBadgeMode.values[setting.get(
-        SettingBoxKey.dynamicBadgeMode,
-        defaultValue: DynamicBadgeMode.number.code)];
-    defaultHomePage.value =
-        setting.get(SettingBoxKey.defaultHomePage, defaultValue: 0);
-    isDeveloperMode.value = _developerModeService.isDeveloperMode();
+    try {
+      userInfo = userInfoCache.get('userInfoCache');
+      userLogin.value = userInfo != null;
+    } catch (e) {
+      userInfo = null;
+      userLogin.value = false;
+    }
+
+    try {
+      feedBackEnable.value =
+          setting.get(SettingBoxKey.feedBackEnable, defaultValue: false);
+    } catch (e) {
+      feedBackEnable.value = false;
+    }
+
+    try {
+      toastOpacity.value =
+          setting.get(SettingBoxKey.defaultToastOp, defaultValue: 1.0);
+    } catch (e) {
+      toastOpacity.value = 1.0;
+    }
+
+    try {
+      picQuality.value =
+          setting.get(SettingBoxKey.defaultPicQa, defaultValue: 10);
+    } catch (e) {
+      picQuality.value = 10;
+    }
+
+    try {
+      themeType.value = ThemeType.values[setting.get(SettingBoxKey.themeMode,
+          defaultValue: ThemeType.system.code)];
+    } catch (e) {
+      themeType.value = ThemeType.system;
+    }
+
+    try {
+      dynamicBadgeType.value = DynamicBadgeMode.values[setting.get(
+          SettingBoxKey.dynamicBadgeMode,
+          defaultValue: DynamicBadgeMode.number.code)];
+    } catch (e) {
+      dynamicBadgeType.value = DynamicBadgeMode.number;
+    }
+
+    try {
+      defaultHomePage.value =
+          setting.get(SettingBoxKey.defaultHomePage, defaultValue: 0);
+    } catch (e) {
+      defaultHomePage.value = 0;
+    }
+
+    try {
+      isDeveloperMode.value = _developerModeService.isDeveloperMode();
+    } catch (e) {
+      isDeveloperMode.value = false;
+    }
   }
 
   Future<void> loginOut() async {
@@ -65,13 +105,19 @@ class SettingController extends GetxController {
             ),
             TextButton(
               onPressed: () async {
-                // 清空本地存储的用户标识
-                userInfoCache.put('userInfoCache', null);
-                localCache
-                    .put(LocalCacheKey.accessKey, {'mid': -1, 'value': ''});
+                try {
+                  // 清空本地存储的用户标识
+                  userInfoCache.put('userInfoCache', null);
+                  localCache
+                      .put(LocalCacheKey.accessKey, {'mid': -1, 'value': ''});
 
-                await LoginUtils.refreshLoginStatus(false);
-                SmartDialog.dismiss().then((value) => Get.back());
+                  await LoginUtils.refreshLoginStatus(false);
+                  userLogin.value = false; // 更新登录状态
+                  SmartDialog.dismiss().then((value) => Get.back());
+                } catch (e) {
+                  SmartDialog.dismiss();
+                  SmartDialog.showToast('退出登录失败：$e');
+                }
               },
               child: const Text('确认'),
             )

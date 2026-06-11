@@ -13,7 +13,7 @@ class FavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String heroTag = Utils.makeHeroTag(favFolderItem.fid);
+    String heroTag = Utils.makeHeroTag(favFolderItem.fid, 'fav');
     return InkWell(
       onTap: () async {
         Get.toNamed(

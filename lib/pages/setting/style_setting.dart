@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -24,14 +22,14 @@ class StyleSetting extends StatefulWidget {
 }
 
 class _StyleSettingState extends State<StyleSetting> {
-  final SettingController settingController = Get.put(SettingController());
+  final SettingController settingController = Get.find<SettingController>();
   final ColorSelectController colorSelectController =
       Get.put(ColorSelectController());
 
-  Box setting = GStrorage.setting;
+  Box<dynamic> setting = GStorage.setting;
   late int picQuality;
   late ThemeType _tempThemeValue;
-  late dynamic defaultCustomRows;
+  late int defaultCustomRows;
 
   @override
   void initState() {
@@ -59,29 +57,6 @@ class _StyleSettingState extends State<StyleSetting> {
       ),
       body: ListView(
         children: [
-          Obx(
-            () => ListTile(
-              enableFeedback: true,
-              onTap: () => settingController.onOpenFeedBack(),
-              title: const Text('震动反馈'),
-              subtitle: Text('请确定手机设置中已开启震动反馈', style: subTitleStyle),
-              trailing: Transform.scale(
-                alignment: Alignment.centerRight,
-                scale: 0.8,
-                child: Switch(
-                    thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-                        (Set<WidgetState> states) {
-                      if (states.isNotEmpty &&
-                          states.first == WidgetState.selected) {
-                        return const Icon(Icons.done);
-                      }
-                      return null; // All other states will use the default thumbIcon.
-                    }),
-                    value: settingController.feedBackEnable.value,
-                    onChanged: (value) => settingController.onOpenFeedBack()),
-              ),
-            ),
-          ),
           const SetSwitchItem(
             title: 'MD3样式底栏',
             subTitle: '符合Material You设计规范的底栏',
@@ -150,7 +125,7 @@ class _StyleSettingState extends State<StyleSetting> {
                   return StatefulBuilder(
                     builder: (context, StateSetter setState) {
                       final SettingController settingController =
-                          Get.put(SettingController());
+                          Get.find<SettingController>();
                       return AlertDialog(
                         title: const Text('图片质量'),
                         contentPadding: const EdgeInsets.only(
@@ -301,12 +276,6 @@ class _StyleSettingState extends State<StyleSetting> {
           //   onTap: () => Get.toNamed('/actionMenuSet'),
           //   title: Text('操作菜单设置', style: titleStyle),
           // ),
-          if (Platform.isAndroid)
-            ListTile(
-              dense: false,
-              onTap: () => Get.toNamed('/displayModeSetting'),
-              title: Text('屏幕帧率', style: titleStyle),
-            ),
         ],
       ),
     );

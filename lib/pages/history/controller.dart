@@ -14,12 +14,12 @@ class HistoryController extends GetxController {
   RxList<Video> historyList = <Video>[].obs;
   RxBool isLoadingMore = false.obs;
   RxBool pauseStatus = false.obs;
-  Box localCache = GStrorage.localCache;
+  Box localCache = GStorage.localCache;
   RxBool isLoading = false.obs;
   RxBool enableMultiple = false.obs;
   RxInt checkedCount = 0.obs;
   RxInt crossAxisCount = 1.obs;
-  Box userInfoCache = GStrorage.userInfo;
+  Box userInfoCache = GStorage.userInfo;
   UserInfoData? userInfo;
 
   @override

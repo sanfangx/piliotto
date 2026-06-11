@@ -18,12 +18,12 @@ class MainController extends GetxController {
   late List<int> navBarSort;
   final StreamController<bool> bottomBarStream =
       StreamController<bool>.broadcast();
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
   DateTime? _lastPressedAt;
   late bool hideTabBar;
   late PageController pageController;
   int selectedIndex = 0;
-  Box userInfoCache = GStrorage.userInfo;
+  Box userInfoCache = GStorage.userInfo;
   RxBool userLogin = false.obs;
   late Rx<DynamicBadgeMode> dynamicBadgeType = DynamicBadgeMode.number.obs;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -35,7 +35,7 @@ class MainController extends GetxController {
   void onInit() {
     super.onInit();
     if (setting.get(SettingBoxKey.autoUpdate, defaultValue: false)) {
-      Utils.checkUpdata();
+      Utils.checkUpdate();
     }
     hideTabBar = setting.get(SettingBoxKey.hideTabBar, defaultValue: false);
     useDrawerForUser =

@@ -19,7 +19,7 @@ class PlaySetting extends StatefulWidget {
 }
 
 class _PlaySettingState extends State<PlaySetting> {
-  Box setting = GStrorage.setting;
+  Box<dynamic> setting = GStorage.setting;
   late int defaultFullScreenMode;
   late int defaultBtmProgressBehavior;
 
@@ -30,11 +30,6 @@ class _PlaySettingState extends State<PlaySetting> {
         defaultValue: FullScreenMode.values.first.code);
     defaultBtmProgressBehavior = setting.get(SettingBoxKey.btmProgressBehavior,
         defaultValue: BtmProgresBehavior.values.first.code);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -88,9 +83,16 @@ class _PlaySettingState extends State<PlaySetting> {
           if (Platform.isAndroid)
             const SetSwitchItem(
               title: '自动PiP播放',
-              subTitle: '进入后台时画中画播放',
+              subTitle: '进入后台时画中画播放（仅 Android 平台支持）',
               setKey: SettingBoxKey.autoPiP,
               defaultVal: false,
+            )
+          else
+            ListTile(
+              dense: false,
+              title: Text('自动PiP播放', style: titleStyle),
+              subtitle: Text('仅 Android 平台支持', style: subTitleStyle),
+              enabled: false,
             ),
           const SetSwitchItem(
             title: '自动全屏',
@@ -182,6 +184,13 @@ class _PlaySettingState extends State<PlaySetting> {
               }
             },
           ),
+          if (Platform.isAndroid)
+            ListTile(
+              dense: false,
+              onTap: () => Get.toNamed('/displayModeSetting'),
+              title: Text('屏幕帧率', style: titleStyle),
+              subtitle: Text('仅 Android 平台支持', style: subTitleStyle),
+            ),
         ],
       ),
     );

@@ -14,8 +14,8 @@ class PlaySpeedPage extends StatefulWidget {
 }
 
 class _PlaySpeedPageState extends State<PlaySpeedPage> {
-  Box videoStorage = GStrorage.video;
-  Box settingStorage = GStrorage.setting;
+  Box<dynamic> videoSetting = GStorage.video;
+  Box<dynamic> setting = GStorage.setting;
   late double playSpeedDefault;
   late List<double> playSpeedSystem;
   late double longPressSpeedDefault;
@@ -56,17 +56,17 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
     super.initState();
     // 系统预设倍速
     playSpeedSystem =
-        videoStorage.get(VideoBoxKey.playSpeedSystem, defaultValue: playSpeed);
+        videoSetting.get(VideoBoxKey.playSpeedSystem, defaultValue: playSpeed);
     // 默认倍速
     playSpeedDefault =
-        videoStorage.get(VideoBoxKey.playSpeedDefault, defaultValue: 1.0);
+        videoSetting.get(VideoBoxKey.playSpeedDefault, defaultValue: 1.0);
     // 默认长按倍速
     longPressSpeedDefault =
-        videoStorage.get(VideoBoxKey.longPressSpeedDefault, defaultValue: 2.0);
+        videoSetting.get(VideoBoxKey.longPressSpeedDefault, defaultValue: 2.0);
     // 自定义倍速
     customSpeedsList =
-        videoStorage.get(VideoBoxKey.customSpeedsList, defaultValue: []);
-    enableAutoLongPressSpeed = settingStorage
+        videoSetting.get(VideoBoxKey.customSpeedsList, defaultValue: []);
+    enableAutoLongPressSpeed = setting
         .get(SettingBoxKey.enableAutoLongPressSpeed, defaultValue: false);
     // 开启动态长按倍速时不展示
     if (enableAutoLongPressSpeed) {
@@ -114,7 +114,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
             TextButton(
               onPressed: () async {
                 customSpeedsList.add(customSpeed);
-                await videoStorage.put(
+                await videoSetting.put(
                     VideoBoxKey.customSpeedsList, customSpeedsList);
                 setState(() {});
                 SmartDialog.dismiss();
@@ -173,11 +173,11 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
     if (id == 1) {
       // 设置默认倍速
       playSpeedDefault = chooseSpeed;
-      videoStorage.put(VideoBoxKey.playSpeedDefault, playSpeedDefault);
+      videoSetting.put(VideoBoxKey.playSpeedDefault, playSpeedDefault);
     } else if (id == 2) {
       // 设置默认长按倍速
       longPressSpeedDefault = chooseSpeed;
-      videoStorage.put(
+      videoSetting.put(
           VideoBoxKey.longPressSpeedDefault, longPressSpeedDefault);
     } else if (id == -1) {
       late List speedsList =
@@ -187,11 +187,11 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
       }
       if (speedsList[index] == longPressSpeedDefault) {
         longPressSpeedDefault = 2.0;
-        videoStorage.put(
+        videoSetting.put(
             VideoBoxKey.longPressSpeedDefault, longPressSpeedDefault);
       }
       speedsList.removeAt(index);
-      await videoStorage.put(
+      await videoSetting.put(
           type == 'system'
               ? VideoBoxKey.playSpeedSystem
               : VideoBoxKey.customSpeedsList,

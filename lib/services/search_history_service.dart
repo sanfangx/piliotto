@@ -5,7 +5,7 @@ class SearchHistoryService {
   static const String _historyKey = 'searchHistory';
   static const int _maxHistoryCount = 20;
 
-  final Box _historyBox = GStrorage.historyword;
+  final Box _historyBox = GStorage.historyword;
   List<String> _searchHistory = [];
 
   List<String> loadSearchHistory() {

@@ -86,7 +86,8 @@ class DeveloperPage extends StatelessWidget {
   }
 
   /// 构建系统信息区域
-  Widget _buildSystemInfoSection(BuildContext context, DeveloperController controller) {
+  Widget _buildSystemInfoSection(
+      BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return ExpansionTile(
@@ -133,7 +134,8 @@ class DeveloperPage extends StatelessWidget {
   }
 
   /// 构建信息卡片
-  Widget _buildInfoCard(BuildContext context, String title, Map<String, dynamic> info) {
+  Widget _buildInfoCard(
+      BuildContext context, String title, Map<String, dynamic> info) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Card(
@@ -183,7 +185,8 @@ class DeveloperPage extends StatelessWidget {
   }
 
   /// 构建快捷操作区域
-  Widget _buildQuickActionsSection(BuildContext context, DeveloperController controller) {
+  Widget _buildQuickActionsSection(
+      BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -193,7 +196,8 @@ class DeveloperPage extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
             children: [
-              Icon(Icons.flash_on_outlined, size: 20, color: colorScheme.primary),
+              Icon(Icons.flash_on_outlined,
+                  size: 20, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
                 '快捷操作',
@@ -248,7 +252,8 @@ class DeveloperPage extends StatelessWidget {
   }
 
   /// 构建调试工具区域
-  Widget _buildDebugToolsSection(BuildContext context, DeveloperController controller) {
+  Widget _buildDebugToolsSection(
+      BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -273,7 +278,8 @@ class DeveloperPage extends StatelessWidget {
         ),
         // 网络调试
         ListTile(
-          leading: Icon(Icons.network_check_outlined, color: colorScheme.primary),
+          leading:
+              Icon(Icons.network_check_outlined, color: colorScheme.primary),
           title: const Text('网络调试'),
           subtitle: Obx(() {
             try {
@@ -295,10 +301,10 @@ class DeveloperPage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right_outlined),
           onTap: controller.openPerformance,
         ),
+        // 浏览器测试
+        _buildBrowserTestTile(context, controller),
         // 路由跳转测试
         _buildRouteTestTile(context, controller),
-        // 内置浏览器
-        _buildWebviewTile(context, controller),
         // 对话框测试
         _buildDialogTestTile(context),
         // 状态页面测试
@@ -307,8 +313,195 @@ class DeveloperPage extends StatelessWidget {
     );
   }
 
+  /// 构建浏览器测试项
+  Widget _buildBrowserTestTile(
+      BuildContext context, DeveloperController controller) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return ExpansionTile(
+      leading: Icon(Icons.language_outlined, color: colorScheme.primary),
+      title: const Text('浏览器测试'),
+      subtitle: const Text('输入 URL 测试 WebView 页面'),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: controller.browserUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'URL',
+                  hintText: '例如: https://example.com',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller.browserTitleController,
+                decoration: const InputDecoration(
+                  labelText: '页面标题（可选）',
+                  hintText: '显示在 AppBar 的标题',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 主标题模式选择
+              DropdownButtonFormField<String>(
+                initialValue: controller.browserTitleModeController.text.isEmpty
+                    ? null
+                    : controller.browserTitleModeController.text,
+                decoration: const InputDecoration(
+                  labelText: '主标题模式（可选）',
+                  hintText: '留空则使用默认配置',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'fixed', child: Text('固定文本')),
+                  DropdownMenuItem(value: 'webTitle', child: Text('网页名称')),
+                ],
+                onChanged: (value) {
+                  controller.browserTitleModeController.text = value ?? '';
+                },
+              ),
+              const SizedBox(height: 12),
+              // 副标题模式选择
+              DropdownButtonFormField<String>(
+                initialValue:
+                    controller.browserSubtitleModeController.text.isEmpty
+                        ? null
+                        : controller.browserSubtitleModeController.text,
+                decoration: const InputDecoration(
+                  labelText: '副标题模式（可选）',
+                  hintText: '留空则使用默认配置',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'fixed', child: Text('固定文本')),
+                  DropdownMenuItem(value: 'webTitle', child: Text('网页名称')),
+                  DropdownMenuItem(value: 'webUrl', child: Text('网页链接')),
+                  DropdownMenuItem(value: 'none', child: Text('无副标题')),
+                ],
+                onChanged: (value) {
+                  controller.browserSubtitleModeController.text = value ?? '';
+                },
+              ),
+              const SizedBox(height: 12),
+              // JS 注入模式选择
+              DropdownButtonFormField<String>(
+                initialValue:
+                    controller.browserJsInjectionModeController.text.isEmpty
+                        ? null
+                        : controller.browserJsInjectionModeController.text,
+                decoration: const InputDecoration(
+                  labelText: 'JS 注入模式（可选）',
+                  hintText: '留空则使用默认配置',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                items: const [
+                  DropdownMenuItem(
+                      value: 'override', child: Text('override - 只执行调用时 JS')),
+                  DropdownMenuItem(
+                      value: 'merge', child: Text('merge - 先全局再调用时')),
+                  DropdownMenuItem(
+                      value: 'globalOnly',
+                      child: Text('globalOnly - 只执行全局 JS')),
+                  DropdownMenuItem(
+                      value: 'callOnly', child: Text('callOnly - 只执行调用时 JS')),
+                ],
+                onChanged: (value) {
+                  controller.browserJsInjectionModeController.text =
+                      value ?? '';
+                },
+              ),
+              const SizedBox(height: 12),
+              // 调用时 JS 代码输入
+              TextField(
+                controller: controller.browserJsInjectionController,
+                maxLines: 4,
+                minLines: 2,
+                decoration: const InputDecoration(
+                  labelText: '调用时 JS 代码（可选）',
+                  hintText: '例如: console.log("Hello");',
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: controller.openBrowserTest,
+                icon: const Icon(Icons.open_in_browser_outlined),
+                label: const Text('打开'),
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              // 全局 JS 注入配置
+              Row(
+                children: [
+                  Icon(Icons.code_outlined,
+                      size: 18, color: colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    '全局 JS 注入',
+                    style: TextStyle(
+                      fontSize: AppFontSize.base,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '输入的 JavaScript 代码将在所有网页加载时自动执行',
+                style: TextStyle(
+                  fontSize: AppFontSize.sm,
+                  color: colorScheme.outline,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller.globalJsInjectionController,
+                maxLines: 6,
+                minLines: 4,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: '// 在此输入 JS 代码\n// 例如:\n// console.log("Hello");',
+                  alignLabelWithHint: true,
+                ),
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton.tonal(
+                  onPressed: controller.saveGlobalJsInjection,
+                  child: const Text('保存 JS 代码'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   /// 构建路由跳转测试项
-  Widget _buildRouteTestTile(BuildContext context, DeveloperController controller) {
+  Widget _buildRouteTestTile(
+      BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return ExpansionTile(
@@ -344,75 +537,6 @@ class DeveloperPage extends StatelessWidget {
                 onPressed: controller.navigateToRoute,
                 icon: const Icon(Icons.arrow_forward_outlined),
                 label: const Text('跳转'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 构建 WebView 测试项
-  Widget _buildWebviewTile(BuildContext context, DeveloperController controller) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return ExpansionTile(
-      leading: Icon(Icons.public_outlined, color: colorScheme.primary),
-      title: const Text('内置浏览器'),
-      subtitle: const Text('配置并打开 WebView 页面'),
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: controller.webviewUrlController,
-                decoration: const InputDecoration(
-                  labelText: 'URL *',
-                  hintText: '例如: www.example.com',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller.webviewTitleController,
-                decoration: const InputDecoration(
-                  labelText: '页面标题',
-                  hintText: '默认: 开发者浏览器',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller.webviewTypeController,
-                decoration: const InputDecoration(
-                  labelText: '页面类型',
-                  hintText: '例如: login',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Obx(() => SwitchListTile(
-                    title: const Text('显示 AppBar'),
-                    value: controller.webviewShowAppBar.value,
-                    onChanged: (value) {
-                      controller.webviewShowAppBar.value = value;
-                    },
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                  )),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: controller.openWebview,
-                  icon: const Icon(Icons.open_in_browser_outlined),
-                  label: const Text('打开'),
-                ),
               ),
             ],
           ),
@@ -494,7 +618,8 @@ class DeveloperPage extends StatelessWidget {
   }
 
   /// 构建路由信息区域
-  Widget _buildRouteInfoSection(BuildContext context, DeveloperController controller) {
+  Widget _buildRouteInfoSection(
+      BuildContext context, DeveloperController controller) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(

@@ -28,7 +28,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   MediaController? _mediaController;
 
   int? _lastSelectTime;
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
   late bool enableMYBar;
 
   @override
@@ -90,14 +90,14 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    GStrorage.close();
+    GStorage.close();
     EventBus().off(EventName.loginEvent);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Box localCache = GStrorage.localCache;
+    Box localCache = GStorage.localCache;
     double statusBarHeight = MediaQuery.of(context).padding.top;
     double sheetHeight = MediaQuery.sizeOf(context).height -
         MediaQuery.of(context).padding.top -

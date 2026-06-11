@@ -19,7 +19,7 @@ class VideoReplyController extends GetxController {
   int ps = 12;
   int count = 0;
 
-  Box setting = GStrorage.setting;
+  Box setting = GStorage.setting;
   final ICommentRepository _commentRepo = Get.find<ICommentRepository>();
 
   void updateVid(int newVid) {

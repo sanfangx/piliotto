@@ -110,7 +110,7 @@ class _UserListPageState extends State<UserListPage> {
               }
 
               final user = widget.userList[index];
-              final heroTag = Utils.makeHeroTag(user.uid);
+              final heroTag = Utils.makeHeroTag(user.uid, 'user');
 
               return ListTile(
                 onTap: () {

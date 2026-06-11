@@ -49,8 +49,8 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   double doubleOffset = 0;
   double videoHeight = 0;
 
-  final Box<dynamic> localCache = GStrorage.localCache;
-  final Box<dynamic> setting = GStrorage.setting;
+  final Box<dynamic> localCache = GStorage.localCache;
+  final Box<dynamic> setting = GStorage.setting;
   late double statusBarHeight;
   late Future _futureBuilderFuture;
   late bool autoExitFullcreen;

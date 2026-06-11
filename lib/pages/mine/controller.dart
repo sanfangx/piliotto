@@ -13,8 +13,8 @@ class MineController extends GetxController {
   Rx<UserInfoData> userInfo = UserInfoData().obs;
   Rx<UserStat> userStat = UserStat().obs;
   RxBool userLogin = false.obs;
-  Box userInfoCache = GStrorage.userInfo;
-  Box setting = GStrorage.setting;
+  Box userInfoCache = GStorage.userInfo;
+  Box setting = GStorage.setting;
   Rx<ThemeType> themeType = ThemeType.system.obs;
 
   @override

@@ -26,7 +26,7 @@ class MessageController extends GetxController {
   }
 
   void _initCurrentUser() {
-    final userInfo = GStrorage.userInfo.get('userInfoCache');
+    final userInfo = GStorage.userInfo.get('userInfoCache');
     if (userInfo != null) {
       currentUser.value = Friend(
         uid: userInfo.mid ?? 0,
@@ -67,7 +67,7 @@ class MessageController extends GetxController {
 
     try {
       final myUid = currentUser.value?.uid ??
-          GStrorage.userInfo.get('userInfoCache')?.mid ??
+          GStorage.userInfo.get('userInfoCache')?.mid ??
           0;
 
       final allFriends = await _messageRepo.getMergedFriendList(
