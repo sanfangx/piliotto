@@ -898,12 +898,10 @@ class _HeaderControlState extends State<HeaderControl> {
                         !playerController.isOpenDanmu.value;
                     _saveDanmakuStatus();
                   },
-                  icon: Icon(
-                    playerController.isOpenDanmu.value
-                        ? Icons.subtitles_outlined
-                        : Icons.subtitles_off_outlined,
-                    size: 19,
-                    color: Colors.white,
+                  icon: AnimatedToggleIcon(
+                    condition: playerController.isOpenDanmu.value,
+                    trueIcon: Icon(Icons.subtitles_outlined, size: 19, color: Colors.white),
+                    falseIcon: Icon(Icons.subtitles_off_outlined, size: 19, color: Colors.white),
                   ),
                 ),
               ),

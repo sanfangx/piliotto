@@ -3,6 +3,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/ottohub/models/member/info.dart';
+import 'package:piliotto/ottohub/api/models/following.dart';
 
 class ProfilePanel extends StatelessWidget {
   final dynamic ctr;
@@ -122,9 +123,11 @@ class ProfilePanel extends StatelessWidget {
                           Obx(
                             () => Expanded(
                               child: TextButton(
-                                onPressed: () => loadingStatus
+                                onPressed: ctr.isFollowLoading.value
                                     ? null
-                                    : ctr.actionRelationMod(),
+                                    : () => loadingStatus
+                                        ? null
+                                        : ctr.actionRelationMod(),
                                 style: TextButton.styleFrom(
                                   foregroundColor: ctr.attribute.value == -1
                                       ? Colors.transparent
@@ -138,7 +141,41 @@ class ProfilePanel extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
-                                child: Obx(() => Text(ctr.attributeText.value)),
+                                child: Obx(() {
+                                  // 优先显示拉黑状态，否则显示关注状态
+                                  if (ctr.attribute.value == 128) {
+                                    return const Text('已拉黑');
+                                  }
+
+                                  // 如果正在加载，显示加载指示器
+                                  if (ctr.isFollowLoading.value) {
+                                    return SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: ctr.attribute.value != 0
+                                            ? colorScheme.outline
+                                            : colorScheme.onPrimary,
+                                      ),
+                                    );
+                                  }
+
+                                  // 根据关注状态显示不同文本
+                                  final FollowStatus status = ctr.followStatus.value;
+                                  final String buttonText;
+                                  if (status == FollowStatus.mutualFollow) {
+                                    buttonText = '互相关注';
+                                  } else if (status == FollowStatus.following) {
+                                    buttonText = '已关注';
+                                  } else if (status == FollowStatus.follower) {
+                                    buttonText = '回关';
+                                  } else {
+                                    buttonText = '关注';
+                                  }
+
+                                  return Text(buttonText);
+                                }),
                               ),
                             ),
                           ),

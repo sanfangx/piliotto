@@ -98,6 +98,8 @@ class AuthService {
     final response = await ApiService.request(
       '$baseEndpoint/sign-in',
       method: 'POST',
+      body: {},  // 传递空 Map，拦截器会自动添加 token
+      requireToken: true,
     );
     return SignInResponse.fromJson(response);
   }

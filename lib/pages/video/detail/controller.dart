@@ -120,6 +120,8 @@ class VideoDetailController extends GetxController
   // 弹幕数量
   final RxInt _danmakuCount = 0.obs;
   int get danmakuCount => _danmakuCount.value;
+  // 提供响应式变量供其他 Controller 监听
+  RxInt get danmakuCountRx => _danmakuCount;
 
   @override
   void onInit() {

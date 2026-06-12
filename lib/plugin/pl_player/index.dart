@@ -6,6 +6,7 @@ export './models/data_source.dart';
 export './models/play_status.dart';
 export './models/data_status.dart';
 export './widgets/common_btn.dart';
+export './widgets/animated_toggle_icon.dart';
 export './models/play_speed.dart';
 export './models/fullscreen_mode.dart';
 export './models/bottom_progress_behavior.dart';

@@ -14,7 +14,7 @@ class MessageController extends GetxController {
   RxList<Friend> userList = <Friend>[].obs;
 
   int _offset = 0;
-  final int _pageSize = 20;
+  final int _pageSize = 12; // API 限制 num 不能超过 12
   bool _hasMore = true;
 
   @override
@@ -66,14 +66,9 @@ class MessageController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final myUid = currentUser.value?.uid ??
-          GStorage.userInfo.get('userInfoCache')?.mid ??
-          0;
-
-      final allFriends = await _messageRepo.getMergedFriendList(
-        uid: myUid,
+      final allFriends = await _messageRepo.getFriendList(
         offset: _offset,
-        pageSize: _pageSize,
+        num: _pageSize,
       );
 
       if (allFriends.length < _pageSize) {

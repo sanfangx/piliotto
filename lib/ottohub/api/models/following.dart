@@ -155,14 +155,52 @@ class FollowResponse {
   }
 }
 
-class FollowStatusResponse {
-  final int followStatus;
+/// 关注状态枚举
+enum FollowStatus {
+  /// 未关注也不是粉丝（陌生人）
+  stranger,
+  /// 单项关注（我关注了他，但他没关注我）
+  following,
+  /// 是粉丝（他关注了我，但我没关注他）
+  follower,
+  /// 互相关注（双方都关注了对方）
+  mutualFollow,
+}
 
-  FollowStatusResponse({required this.followStatus});
+class FollowStatusResponse {
+  final FollowStatus status;
+
+  FollowStatusResponse({required this.status});
 
   factory FollowStatusResponse.fromJson(Map<String, dynamic> json) {
-    return FollowStatusResponse(
-      followStatus: json['follow_status'],
-    );
+    final int value = json['follow_status'];
+    FollowStatus status;
+    switch (value) {
+      case 1:
+        status = FollowStatus.stranger;
+        break;
+      case 2:
+        status = FollowStatus.following;
+        break;
+      case 3:
+        status = FollowStatus.follower;
+        break;
+      case 4:
+        status = FollowStatus.mutualFollow;
+        break;
+      default:
+        status = FollowStatus.stranger;
+    }
+    return FollowStatusResponse(status: status);
+  }
+
+  /// 是否关注了对方（单项关注或互相关注）
+  bool isFollowing() {
+    return status == FollowStatus.following || status == FollowStatus.mutualFollow;
+  }
+
+  /// 是否互相关注
+  bool isMutualFollow() {
+    return status == FollowStatus.mutualFollow;
   }
 }

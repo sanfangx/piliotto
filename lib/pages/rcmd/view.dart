@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:piliotto/ottohub/api/models/video.dart';
 import 'package:piliotto/common/constants.dart';
 import 'package:piliotto/common/skeleton/video_card_v.dart';
-import 'package:piliotto/common/widgets/http_error.dart';
 import 'package:piliotto/common/widgets/no_data.dart';
 import 'package:piliotto/common/widgets/video_card_v.dart';
 import 'package:piliotto/utils/main_stream.dart';
@@ -99,15 +98,30 @@ class _RcmdPageState extends State<RcmdPage>
                   );
                 });
               } else {
-                return HttpError(
-                  errMsg: data['msg'],
-                  fn: () {
-                    setState(() {
-                      _rcmdController.isLoadingMore.value = true;
-                      _futureBuilderFuture =
-                          _rcmdController.queryRcmdFeed('init');
-                    });
-                  },
+                return SizedBox(
+                  height: 400,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 64),
+                      const SizedBox(height: 16),
+                      Text(
+                        data['msg'] ?? '请求失败',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 20),
+                      FilledButton.tonal(
+                        onPressed: () {
+                          setState(() {
+                            _rcmdController.isLoadingMore.value = true;
+                            _futureBuilderFuture =
+                                _rcmdController.queryRcmdFeed('init');
+                          });
+                        },
+                        child: const Text('点击重试'),
+                      ),
+                    ],
+                  ),
                 );
               }
             } else {

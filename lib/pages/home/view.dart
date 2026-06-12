@@ -266,9 +266,18 @@ class UserInfoWidget extends StatelessWidget {
           if (userLogin.value) ...[
             const SizedBox(width: AppSpacing.xs),
             ClipRect(
-              child: IconButton(
-                onPressed: () => Get.toNamed('/message'),
-                icon: const Icon(Icons.notifications_none),
+              child: Obx(
+                () {
+                  final unreadNum = ctr?.unreadMessageNum.value ?? 0;
+                  return Badge(
+                    label: unreadNum > 0 ? Text('$unreadNum') : null,
+                    isLabelVisible: unreadNum > 0,
+                    child: IconButton(
+                      onPressed: () => Get.toNamed('/message'),
+                      icon: const Icon(Icons.notifications_none),
+                    ),
+                  );
+                },
               ),
             ),
           ],

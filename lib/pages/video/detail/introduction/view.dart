@@ -11,6 +11,7 @@ import 'package:piliotto/common/widgets/network_img_layer.dart';
 import 'package:piliotto/common/widgets/stat/danmu.dart';
 import 'package:piliotto/common/widgets/stat/view.dart';
 import 'package:piliotto/pages/video/detail/introduction/controller.dart';
+import 'package:piliotto/ottohub/api/models/following.dart';
 
 import 'package:piliotto/utils/feed_back.dart';
 import 'package:piliotto/utils/global_data_cache.dart';
@@ -176,69 +177,9 @@ class _VideoInfoState extends State<VideoInfo>
           child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SelectableText(
-            widget.videoDetail.title!,
-            maxLines: 2,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 7, bottom: 6),
-            child: Row(
-              children: [
-                StatView(
-                  view: widget.videoDetail.viewCount ?? 0,
-                  size: 'medium',
-                ),
-                const SizedBox(width: 10),
-                Obx(
-                  () => StatDanMu(
-                    danmu: videoIntroController.danmakuCount,
-                    size: 'medium',
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.videoDetail.time ?? '',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: t.colorScheme.outline,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                SelectableText(
-                  'OV${widget.vid}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: t.colorScheme.outline,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          /// 视频简介
-          if (widget.videoDetail.intro != null &&
-              widget.videoDetail.intro!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: MarkdownText(
-                text: widget.videoDetail.intro ?? '',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: t.colorScheme.onSurface,
-                ),
-              ),
-            ),
-
-          /// 点赞收藏转发
-          Material(child: actionGrid(context, videoIntroController)),
-
-          // 作者信息
+          // 作者信息（在最顶部）
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
+            margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
               color: t.colorScheme.surfaceContainerHighest.withAlpha(100),
               borderRadius: BorderRadius.circular(12),
@@ -295,12 +236,33 @@ class _VideoInfoState extends State<VideoInfo>
                       ),
                       Obx(
                         () {
+                          final FollowStatus status =
+                              videoIntroController.followStatusEnum.value;
+                          final bool isLoading =
+                              videoIntroController.isFollowLoading.value;
+
+                          // 根据关注状态显示不同文本
+                          final String buttonText;
+                          if (status == FollowStatus.mutualFollow) {
+                            buttonText = '互相关注';
+                          } else if (status == FollowStatus.following) {
+                            buttonText = '已关注';
+                          } else if (status == FollowStatus.follower) {
+                            buttonText = '回关';
+                          } else {
+                            buttonText = '关注';
+                          }
+
                           final bool isFollowed =
-                              videoIntroController.followStatus.value;
+                              status == FollowStatus.following ||
+                                  status == FollowStatus.mutualFollow;
+
                           return SizedBox(
                             height: 32,
                             child: FilledButton.tonal(
-                              onPressed: videoIntroController.actionRelationMod,
+                              onPressed: isLoading
+                                  ? null
+                                  : videoIntroController.actionRelationMod,
                               style: FilledButton.styleFrom(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
@@ -308,15 +270,24 @@ class _VideoInfoState extends State<VideoInfo>
                                     ? t.colorScheme.surfaceContainerHighest
                                     : null,
                               ),
-                              child: Text(
-                                isFollowed ? '已关注' : '关注',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: isFollowed
-                                      ? t.colorScheme.onSurfaceVariant
-                                      : null,
-                                ),
-                              ),
+                              child: isLoading
+                                  ? SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: t.colorScheme.onSurfaceVariant,
+                                      ),
+                                    )
+                                  : Text(
+                                      buttonText,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: isFollowed
+                                            ? t.colorScheme.onSurfaceVariant
+                                            : null,
+                                      ),
+                                    ),
                             ),
                           );
                         },
@@ -327,6 +298,65 @@ class _VideoInfoState extends State<VideoInfo>
               ),
             ),
           ),
+          SelectableText(
+            widget.videoDetail.title!,
+            maxLines: 2,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 7, bottom: 6),
+            child: Row(
+              children: [
+                StatView(
+                  view: widget.videoDetail.viewCount ?? 0,
+                  size: 'medium',
+                ),
+                const SizedBox(width: 10),
+                Obx(
+                  () => StatDanMu(
+                    danmu: videoIntroController.danmakuCount.value,
+                    size: 'medium',
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  widget.videoDetail.time ?? '',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: t.colorScheme.outline,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SelectableText(
+                  'OV${widget.vid}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: t.colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// 点赞收藏转发
+          Material(child: actionGrid(context, videoIntroController)),
+
+          /// 视频简介
+          if (widget.videoDetail.intro != null &&
+              widget.videoDetail.intro!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: MarkdownText(
+                text: widget.videoDetail.intro ?? '',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: t.colorScheme.onSurface,
+                ),
+              ),
+            ),
         ],
       )),
     );

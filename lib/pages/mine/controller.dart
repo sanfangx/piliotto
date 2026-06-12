@@ -7,6 +7,7 @@ import 'package:piliotto/models/user/info.dart';
 import 'package:piliotto/models/user/stat.dart';
 import 'package:piliotto/utils/storage.dart';
 import 'package:piliotto/services/loggeer.dart';
+import 'package:piliotto/ottohub/models/member/info.dart';
 
 class MineController extends GetxController {
   final IUserRepository _userRepo = Get.find<IUserRepository>();
@@ -49,14 +50,22 @@ class MineController extends GetxController {
       final uid = userInfo.value.mid;
       if (uid == null) return;
 
-      final profileInfo = await _userRepo.getUserProfileInfo(uid: uid);
-      if (profileInfo.coverUrl != null && profileInfo.coverUrl!.isNotEmpty) {
-        userInfo.value.cover = profileInfo.coverUrl;
-      }
-      userStat.value.following = profileInfo.followingCount;
-      userStat.value.follower = profileInfo.fansCount;
+      // 使用 getUserDetail 获取完整的用户信息
+      final MemberInfoModel memberInfo = await _userRepo.getUserDetail(uid: uid);
+
+      // 更新用户信息
+      userInfo.value.cover = memberInfo.cover;
+      userInfo.value.face = memberInfo.face;
+      userInfo.value.uname = memberInfo.name;
+
+      // 更新用户统计信息
+      userStat.value.following = memberInfo.attention;
+      userStat.value.follower = memberInfo.fans;
+
       userInfo.refresh();
       userStat.refresh();
+
+      // 更新缓存
       userInfoCache.put('userInfoCache', userInfo.value);
     } catch (e) {
       getLogger().e('刷新用户信息失败: $e');

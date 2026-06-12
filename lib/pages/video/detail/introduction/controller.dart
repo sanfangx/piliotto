@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:piliotto/repositories/i_video_repository.dart';
 import 'package:piliotto/repositories/i_user_repository.dart';
+import 'package:piliotto/ottohub/api/models/following.dart';
 import 'package:piliotto/pages/video/detail/controller.dart';
 import 'package:piliotto/pages/video/detail/reply/index.dart';
 import 'package:piliotto/utils/feed_back.dart';
@@ -48,11 +49,19 @@ class VideoIntroController extends GetxController {
   List delMediaIdsNew = [];
   // 关注状态 默认未关注
   RxBool followStatus = false.obs;
+  // 关注状态（语义化枚举）
+  Rx<FollowStatus> followStatusEnum = FollowStatus.stranger.obs;
+  // 弹幕数量（从 VideoDetailController 同步）
+  RxInt danmakuCount = 0.obs;
+  // 关注按钮加载状态
+  RxBool isFollowLoading = false.obs;
 
   dynamic userInfo;
 
   String heroTag = '';
   PersistentBottomSheetController? bottomSheetController;
+  // 监听弹幕数量的 Worker
+  Worker? _danmakuWorker;
 
   @override
   void onInit() {
@@ -60,6 +69,13 @@ class VideoIntroController extends GetxController {
     userInfo = userInfoCache.get('userInfoCache');
     heroTag = Get.arguments?['heroTag'] ?? '';
     userLogin = userInfo != null;
+  }
+
+  @override
+  void onClose() {
+    // 取消弹幕数量监听
+    _danmakuWorker?.dispose();
+    super.onClose();
   }
 
   // 获取视频简介
@@ -70,6 +86,8 @@ class VideoIntroController extends GetxController {
           Get.find<VideoDetailController>(tag: heroTag);
       videoDetailCtr.tabs.value = ['简介', '评论'];
       videoDetailCtr.cover.value = videoDetail.value.coverUrl;
+      // 监听 VideoDetailController 的弹幕数量变化
+      _listenDanmakuCount(videoDetailCtr);
       // 获取UP主粉丝数
       queryUserStat();
     } catch (e) {
@@ -85,15 +103,19 @@ class VideoIntroController extends GetxController {
     }
   }
 
-  // 获取弹幕数量
-  int get danmakuCount {
-    try {
-      final VideoDetailController videoDetailCtr =
-          Get.find<VideoDetailController>(tag: heroTag);
-      return videoDetailCtr.danmakuCount;
-    } catch (e) {
-      return 0;
-    }
+  // 监听 VideoDetailController 的弹幕数量变化
+  void _listenDanmakuCount(VideoDetailController videoDetailCtr) {
+    // 取消之前的监听（如果存在）
+    _danmakuWorker?.dispose();
+    // 使用 ever 监听弹幕数量变化
+    _danmakuWorker = ever(
+      videoDetailCtr.danmakuCountRx,
+      (int count) {
+        danmakuCount.value = count;
+      },
+    );
+    // 立即同步当前值
+    danmakuCount.value = videoDetailCtr.danmakuCount;
   }
 
   // 获取up主粉丝数
@@ -207,14 +229,19 @@ class VideoIntroController extends GetxController {
   Future queryFollowStatus() async {
     if (!userLogin || userInfo == null) {
       followStatus.value = false;
+      followStatusEnum.value = FollowStatus.stranger;
       return;
     }
     try {
       var result =
           await _userRepo.getFollowStatus(followingUid: videoDetail.value.uid);
-      followStatus.value = result.followStatus == 1;
+      // 使用兼容层方法判断是否关注
+      followStatus.value = result.isFollowing();
+      // 存储关注状态枚举
+      followStatusEnum.value = result.status;
     } catch (e) {
       followStatus.value = false;
+      followStatusEnum.value = FollowStatus.stranger;
     }
   }
 
@@ -225,49 +252,23 @@ class VideoIntroController extends GetxController {
       SmartDialog.showToast('账号未登录');
       return;
     }
+
+    // 设置加载状态
+    isFollowLoading.value = true;
+
     final bool currentStatus = followStatus.value;
-    SmartDialog.show(
-      useSystem: true,
-      animationType: SmartAnimationType.centerFade_otherSlide,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('提示'),
-          content: Text(currentStatus == false ? '关注UP主?' : '取消关注UP主?'),
-          actions: [
-            TextButton(
-              onPressed: () => SmartDialog.dismiss(),
-              child: Text(
-                '点错了',
-                style: TextStyle(color: Theme.of(context).colorScheme.outline),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await _userRepo.followUser(
-                      followingUid: videoDetail.value.uid);
-                  followStatus.value = !currentStatus;
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content:
-                            Text(currentStatus == false ? '关注成功' : '取消关注成功'),
-                        duration: const Duration(seconds: 2),
-                        showCloseIcon: true,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  SmartDialog.showToast('操作失败：${e.toString()}');
-                }
-                SmartDialog.dismiss();
-              },
-              child: const Text('确认'),
-            )
-          ],
-        );
-      },
-    );
+    try {
+      await _userRepo.followUser(followingUid: videoDetail.value.uid);
+      // 更新关注状态
+      followStatus.value = !currentStatus;
+      // 重新查询关注状态以获取准确的状态枚举
+      await queryFollowStatus();
+    } catch (e) {
+      SmartDialog.showToast('操作失败：${e.toString()}');
+    }
+
+    // 移除加载状态
+    isFollowLoading.value = false;
   }
 
   // 切换视频（用于相关视频推荐等场景）

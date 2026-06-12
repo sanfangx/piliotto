@@ -6,6 +6,7 @@ import 'package:piliotto/repositories/i_user_repository.dart';
 import 'package:piliotto/repositories/i_video_repository.dart';
 import 'package:piliotto/ottohub/models/member/archive.dart';
 import 'package:piliotto/ottohub/models/member/info.dart';
+import 'package:piliotto/ottohub/api/models/following.dart';
 import 'package:piliotto/utils/responsive_util.dart';
 import 'package:piliotto/utils/storage.dart';
 import 'package:share_plus/share_plus.dart';
@@ -26,7 +27,11 @@ class MemberController extends GetxController {
   dynamic userInfo;
   RxInt attribute = (-1).obs;
   RxString attributeText = '关注'.obs;
+  // 关注状态（语义化枚举）
+  Rx<FollowStatus> followStatus = FollowStatus.stranger.obs;
   RxInt crossAxisCount = 1.obs;
+  // 关注按钮加载状态
+  RxBool isFollowLoading = false.obs;
 
   RxBool isOwner = false.obs;
 
@@ -106,37 +111,20 @@ class MemberController extends GetxController {
       blockUser();
       return;
     }
-    SmartDialog.show(
-      useSystem: true,
-      animationType: SmartAnimationType.centerFade_otherSlide,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('提示'),
-          content: Text(attributeText.value == '关注' ? '关注UP主?' : '取消关注UP主?'),
-          actions: [
-            TextButton(
-              onPressed: () => SmartDialog.dismiss(),
-              child: Text(
-                '点错了',
-                style: TextStyle(color: Theme.of(context).colorScheme.outline),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await _userRepo.followUser(followingUid: mid);
-                  await relationSearch();
-                  SmartDialog.dismiss();
-                } catch (e) {
-                  SmartDialog.showToast('操作失败，请重试');
-                }
-              },
-              child: const Text('确认'),
-            )
-          ],
-        );
-      },
-    );
+
+    // 设置加载状态
+    isFollowLoading.value = true;
+
+    try {
+      await _userRepo.followUser(followingUid: mid);
+      // 重新查询关注状态以获取准确的状态枚举
+      await relationSearch();
+    } catch (e) {
+      SmartDialog.showToast('操作失败，请重试');
+    }
+
+    // 移除加载状态
+    isFollowLoading.value = false;
   }
 
   Future relationSearch() async {
@@ -144,16 +132,10 @@ class MemberController extends GetxController {
     if (mid == ownerMid) return;
     try {
       var res = await _userRepo.getFollowStatus(followingUid: mid);
-      if (res.followStatus == 1) {
-        attribute.value = 2;
-        attributeText.value = '已关注';
-      } else {
-        attribute.value = 0;
-        attributeText.value = '关注';
-      }
+      // 存储关注状态枚举
+      followStatus.value = res.status;
     } catch (e) {
-      attribute.value = -1;
-      attributeText.value = '关注';
+      followStatus.value = FollowStatus.stranger;
     }
   }
 

@@ -8,6 +8,7 @@ abstract class IMessageRepository {
       {required int friendUid, int offset = 0, int num = 20});
   Future<bool> sendMessage({required int receiver, required String message});
   Future<int> getUnreadMessageNum();
-  Future<List<Friend>> getMergedFriendList(
-      {required int uid, int offset = 0, int pageSize = 20});
+
+  /// 清除特定好友的消息缓存
+  void invalidateFriendMessageCache(int friendUid);
 }

@@ -11,6 +11,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:piliotto/models/common/gesture_mode.dart';
 import 'package:piliotto/plugin/pl_player/controller.dart';
+import 'package:piliotto/plugin/pl_player/widgets/animated_toggle_icon.dart';
 import 'package:piliotto/plugin/pl_player/models/duration.dart';
 import 'package:piliotto/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:piliotto/plugin/pl_player/utils.dart';
@@ -373,12 +374,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       /// 全屏
       BottomControlType.fullscreen: ComBtn(
         icon: Obx(
-          () => FaIcon(
-            playerController.isFullScreen.value
-                ? FontAwesomeIcons.compress
-                : FontAwesomeIcons.expand,
-            size: 15,
-            color: Colors.white,
+          () => AnimatedToggleIcon(
+            condition: playerController.isFullScreen.value,
+            trueIcon: FaIcon(FontAwesomeIcons.compress, size: 15, color: Colors.white),
+            falseIcon: FaIcon(FontAwesomeIcons.expand, size: 15, color: Colors.white),
           ),
         ),
         fuc: () {
@@ -818,12 +817,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   child: Visibility(
                     visible: playerController.showControls.value,
                     child: ComBtn(
-                      icon: FaIcon(
-                        playerController.controlsLock.value
-                            ? FontAwesomeIcons.lock
-                            : FontAwesomeIcons.lockOpen,
-                        size: 15,
-                        color: Colors.white,
+                      icon: Obx(
+                        () => AnimatedToggleIcon(
+                          condition: playerController.controlsLock.value,
+                          trueIcon: FaIcon(FontAwesomeIcons.lock, size: 15, color: Colors.white),
+                          falseIcon: FaIcon(FontAwesomeIcons.lockOpen, size: 15, color: Colors.white),
+                        ),
                       ),
                       fuc: () => playerController
                           .onLockControl(!playerController.controlsLock.value),

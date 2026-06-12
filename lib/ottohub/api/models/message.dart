@@ -24,6 +24,18 @@ class Message {
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
+    // 解析 is_read 字段，支持多种格式（bool、int、String）
+    final isReadValue = json['is_read'];
+    bool? isRead;
+
+    if (isReadValue == true || isReadValue == 1 || isReadValue == '1') {
+      isRead = true;
+    } else if (isReadValue == false || isReadValue == 0 || isReadValue == '0') {
+      isRead = false;
+    } else {
+      isRead = null; // 未知状态
+    }
+
     return Message(
       msgId: int.tryParse(json['msg_id']?.toString() ?? '0') ?? 0,
       sender: int.tryParse(json['sender']?.toString() ?? '0') ?? 0,
@@ -34,7 +46,7 @@ class Message {
       senderAvatarUrl: json['sender_avatar_url']?.toString(),
       receiverName: json['receiver_name']?.toString(),
       receiverAvatarUrl: json['receiver_avatar_url']?.toString(),
-      isRead: json['is_read'] == true || json['is_read'] == 1,
+      isRead: isRead,
     );
   }
 }

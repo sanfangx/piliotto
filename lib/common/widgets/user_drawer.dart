@@ -5,6 +5,7 @@ import 'package:piliotto/models/common/theme_type.dart';
 import 'package:piliotto/pages/fav/index.dart';
 import 'package:piliotto/pages/history/index.dart';
 import 'package:piliotto/pages/mine/controller.dart';
+import 'package:piliotto/pages/home/controller.dart';
 
 class UserDrawer extends StatelessWidget {
   const UserDrawer({super.key});
@@ -13,6 +14,7 @@ class UserDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final MineController mineController = Get.put(MineController());
+    final HomeController homeController = Get.find<HomeController>();
 
     return Drawer(
       child: SafeArea(
@@ -25,7 +27,8 @@ class UserDrawer extends StatelessWidget {
                   children: [
                     _buildUserStats(theme, mineController),
                     const Divider(height: 1),
-                    _buildMenuItems(context, theme, mineController),
+                    _buildMenuItems(
+                        context, theme, mineController, homeController),
                   ],
                 ),
               ),
@@ -53,9 +56,11 @@ class UserDrawer extends StatelessWidget {
               IconButton(
                 onPressed: () => mineController.onChangeTheme(),
                 icon: Obx(() => Icon(
-                      mineController.themeType.value == ThemeType.dark
+                      mineController.themeType.value == ThemeType.light
                           ? Icons.light_mode
-                          : Icons.dark_mode,
+                          : mineController.themeType.value == ThemeType.dark
+                              ? Icons.dark_mode
+                              : Icons.brightness_auto,
                       size: 20,
                       color: theme.colorScheme.onSecondaryContainer,
                     )),
@@ -201,13 +206,6 @@ class UserDrawer extends StatelessWidget {
                 '粉丝',
                 () => mineController.pushFans(),
               ),
-              _buildStatDivider(theme),
-              _buildStatItem(
-                theme,
-                mineController.userStat.value.dynamicCount?.toString() ?? '0',
-                '动态',
-                () => mineController.pushDynamic(),
-              ),
             ],
           ),
         ));
@@ -253,10 +251,12 @@ class UserDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItems(
-      BuildContext context, ThemeData theme, MineController mineController) {
+  Widget _buildMenuItems(BuildContext context, ThemeData theme,
+      MineController mineController, HomeController? homeController) {
     return Column(
       children: [
+        // 消息按钮（带红点）
+        _buildMessageMenuItem(context, theme, homeController),
         _buildMenuItem(
           context,
           theme,
@@ -271,14 +271,55 @@ class UserDrawer extends StatelessWidget {
           '我的收藏',
           () => Get.to(const FavPage()),
         ),
-        _buildMenuItem(
-          context,
-          theme,
-          Icons.dynamic_feed_outlined,
-          '我的动态',
-          () => mineController.pushDynamic(),
-        ),
       ],
+    );
+  }
+
+  Widget _buildMessageMenuItem(
+      BuildContext context, ThemeData theme, HomeController? homeController) {
+    return ListTile(
+      onTap: () {
+        Navigator.of(context).pop();
+        Get.toNamed('/message');
+      },
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          Icons.message_outlined,
+          size: 20,
+          color: theme.colorScheme.onPrimaryContainer,
+        ),
+      ),
+      title: Text(
+        '消息',
+        style: TextStyle(
+          fontSize: 15,
+          color: theme.colorScheme.onSurface,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: Obx(
+        () {
+          final unreadNum = homeController?.unreadMessageNum.value ?? 0;
+          if (unreadNum > 0) {
+            return Badge(
+              label: Text('$unreadNum'),
+              backgroundColor: theme.colorScheme.error,
+            );
+          }
+          return Icon(
+            Icons.chevron_right,
+            size: 18,
+            color: theme.colorScheme.outline,
+          );
+        },
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }
 

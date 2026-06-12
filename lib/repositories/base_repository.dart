@@ -44,6 +44,13 @@ abstract class BaseRepository {
     _cache.remove(key);
   }
 
+  /// 清除以指定前缀开头的所有缓存
+  void invalidateCacheByPrefix(String prefix) {
+    _cache.keys.where((key) => key.startsWith(prefix)).toList().forEach((key) {
+      _cache.remove(key);
+    });
+  }
+
   void invalidateAllCache() {
     _cache.clear();
   }

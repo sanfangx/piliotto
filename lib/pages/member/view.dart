@@ -10,6 +10,7 @@ import 'package:piliotto/common/widgets/no_data.dart';
 import 'package:piliotto/common/widgets/page_widgets.dart';
 import 'package:piliotto/common/widgets/user_profile_header.dart';
 import 'package:piliotto/common/widgets/video_card_h.dart';
+import 'package:piliotto/ottohub/api/models/following.dart';
 import 'package:piliotto/pages/dynamics/widgets/dynamic_panel.dart';
 import 'package:piliotto/pages/fav/index.dart';
 import 'package:piliotto/pages/member/index.dart';
@@ -369,7 +370,13 @@ class _MemberPageState extends State<MemberPage>
         showActionButtons: !_memberController.isOwner.value,
         isOwner: _memberController.isOwner.value,
         onRelationAction: _memberController.actionRelationMod,
-        relationButtonText: _memberController.attributeText.value,
+        relationButtonText: _memberController.attribute.value == 128
+            ? '已拉黑'
+            : (_memberController.followStatus.value == FollowStatus.mutualFollow
+                ? '互相关注'
+                : (_memberController.followStatus.value == FollowStatus.following
+                    ? '已关注'
+                    : '关注')),
         onMessageAction: () => Get.toNamed('/message', parameters: {
           'mid': mid.toString(),
           'name': _memberController.memberInfo.value.name ?? '',

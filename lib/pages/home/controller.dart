@@ -6,9 +6,11 @@ import 'package:hive/hive.dart';
 import 'package:piliotto/models/common/tab_type.dart';
 import 'package:piliotto/utils/storage.dart';
 import 'package:piliotto/repositories/i_video_repository.dart';
+import 'package:piliotto/repositories/i_message_repository.dart';
 
 class HomeController extends GetxController with GetTickerProviderStateMixin {
   final IVideoRepository _videoRepo = Get.find<IVideoRepository>();
+  final IMessageRepository _messageRepo = Get.find<IMessageRepository>();
   bool flag = false;
   late RxList tabs = [].obs;
   RxInt initialIndex = 1.obs;
@@ -28,6 +30,8 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
   late List<String> tabbarSort;
   RxString defaultSearch = ''.obs;
   late bool enableGradientBg;
+  RxInt unreadMessageNum = 0.obs;
+  Timer? _unreadMessageTimer;
 
   @override
   void onInit() {
@@ -42,6 +46,9 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
         setting.get(SettingBoxKey.enableGradientBg, defaultValue: true);
     // 进行tabs配置
     setTabConfig();
+    // 获取未读消息数
+    _loadUnreadMessageNum();
+    _startUnreadMessagePolling();
   }
 
   void onRefresh() {
@@ -62,6 +69,14 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
     userLogin.value = val ?? false;
     if (val ?? false) return;
     userFace.value = userInfo != null ? userInfo.face : '';
+    // 登录状态变化时，重新获取未读消息数
+    if (val ?? false) {
+      _loadUnreadMessageNum();
+      _startUnreadMessagePolling();
+    } else {
+      _stopUnreadMessagePolling();
+      unreadMessageNum.value = 0;
+    }
   }
 
   void setTabConfig() async {
@@ -124,9 +139,39 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
     }
   }
 
+  // 加载未读消息数
+  Future<void> _loadUnreadMessageNum() async {
+    if (!userLogin.value) return;
+
+    try {
+      final num = await _messageRepo.getUnreadMessageNum();
+      unreadMessageNum.value = num;
+    } catch (e) {
+      // 静默处理错误
+    }
+  }
+
+  // 开始轮询未读消息数
+  void _startUnreadMessagePolling() {
+    if (!userLogin.value) return;
+
+    _unreadMessageTimer?.cancel();
+    _unreadMessageTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _loadUnreadMessageNum(),
+    );
+  }
+
+  // 停止轮询未读消息数
+  void _stopUnreadMessagePolling() {
+    _unreadMessageTimer?.cancel();
+    _unreadMessageTimer = null;
+  }
+
   @override
   void onClose() {
     searchBarStream.close();
+    _stopUnreadMessagePolling();
     super.onClose();
   }
 }

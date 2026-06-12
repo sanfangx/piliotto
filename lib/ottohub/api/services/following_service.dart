@@ -11,6 +11,7 @@ class FollowingService {
     final response = await ApiService.request(
       '$baseEndpoint/follow/$followingUid',
       method: 'POST',
+      body: {},  // 传递空 Map，拦截器会自动添加 token
       requireToken: true,
     );
     return FollowResponse.fromJson(response);
