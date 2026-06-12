@@ -125,9 +125,7 @@ class ProfilePanel extends StatelessWidget {
                               child: TextButton(
                                 onPressed: ctr.isFollowLoading.value
                                     ? null
-                                    : () => loadingStatus
-                                        ? null
-                                        : ctr.actionRelationMod(),
+                                    : () => ctr.actionRelationMod(),
                                 style: TextButton.styleFrom(
                                   foregroundColor: ctr.attribute.value == -1
                                       ? Colors.transparent

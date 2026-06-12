@@ -252,7 +252,7 @@ class UserDrawer extends StatelessWidget {
   }
 
   Widget _buildMenuItems(BuildContext context, ThemeData theme,
-      MineController mineController, HomeController? homeController) {
+      MineController mineController, HomeController homeController) {
     return Column(
       children: [
         // 消息按钮（带红点）
@@ -276,7 +276,7 @@ class UserDrawer extends StatelessWidget {
   }
 
   Widget _buildMessageMenuItem(
-      BuildContext context, ThemeData theme, HomeController? homeController) {
+      BuildContext context, ThemeData theme, HomeController homeController) {
     return ListTile(
       onTap: () {
         Navigator.of(context).pop();
@@ -305,7 +305,7 @@ class UserDrawer extends StatelessWidget {
       ),
       trailing: Obx(
         () {
-          final unreadNum = homeController?.unreadMessageNum.value ?? 0;
+          final unreadNum = homeController.unreadMessageNum.value;
           if (unreadNum > 0) {
             return Badge(
               label: Text('$unreadNum'),
