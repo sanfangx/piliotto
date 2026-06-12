@@ -8,13 +8,14 @@ import 'package:piliotto/pages/mine/controller.dart';
 import 'package:piliotto/pages/home/controller.dart';
 
 class UserDrawer extends StatelessWidget {
-  const UserDrawer({super.key});
+  final HomeController homeController;
+
+  const UserDrawer({super.key, required this.homeController});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final MineController mineController = Get.put(MineController());
-    final HomeController homeController = Get.find<HomeController>();
 
     return Drawer(
       child: SafeArea(

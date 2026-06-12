@@ -121,7 +121,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     final useDrawer = _mainController.useDrawerForUser;
     return Scaffold(
       key: _mainController.scaffoldKey,
-      drawer: useDrawer ? const UserDrawer() : null,
+      drawer: useDrawer ? UserDrawer(homeController: _homeController) : null,
       extendBody: true,
       body: Stack(
         children: [
