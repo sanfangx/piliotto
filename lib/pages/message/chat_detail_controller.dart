@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:piliotto/ottohub/api/models/message.dart';
 import 'package:piliotto/ottohub/api/services/message_service.dart';
 import 'package:piliotto/repositories/i_message_repository.dart';
+import 'package:piliotto/pages/home/controller.dart';
 import 'package:piliotto/utils/storage.dart';
 
 /// 聊天详情控制器
@@ -54,6 +55,7 @@ class ChatDetailController extends GetxController {
   void onClose() {
     _stopPolling();
     scrollController.dispose();
+    _refreshUnreadCount();
     super.onClose();
   }
 
@@ -197,6 +199,7 @@ class ChatDetailController extends GetxController {
         // 清除缓存并刷新消息列表
         repo.invalidateFriendMessageCache(friendUid);
         await loadMessages(refresh: true);
+        _refreshUnreadCount();
       }
     } catch (e) {
       // Handle error silently
@@ -214,6 +217,7 @@ class ChatDetailController extends GetxController {
         // 清除缓存并刷新消息列表
         Get.find<IMessageRepository>().invalidateFriendMessageCache(friendUid);
         await loadMessages(refresh: true);
+        _refreshUnreadCount();
       }
     } catch (e) {
       // Handle error silently
@@ -244,5 +248,12 @@ class ChatDetailController extends GetxController {
     _deletingMessageIds.remove(msgId);
     messages.removeWhere((msg) => msg.msgId == msgId);
     update(['messages']);
+  }
+
+  /// 刷新首页未读消息数
+  void _refreshUnreadCount() {
+    try {
+      Get.find<HomeController>().refreshUnreadMessageNum();
+    } catch (_) {}
   }
 }

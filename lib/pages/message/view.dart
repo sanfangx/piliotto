@@ -61,68 +61,9 @@ class _MessagePageState extends State<MessagePage> {
             icon: const Icon(Icons.person_add),
             tooltip: '添加好友',
           ),
-          if (isWideScreen)
-            IconButton(
-              onPressed: () => _showUserSwitcher(context),
-              icon: const Icon(Icons.swap_horiz),
-              tooltip: '切换用户',
-            ),
         ],
       ),
       body: isWideScreen ? _buildWideLayout(theme) : _buildNarrowLayout(theme),
-    );
-  }
-
-  void _showUserSwitcher(BuildContext context) {
-    final theme = Theme.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('切换用户'),
-        content: Obx(() {
-          if (controller.userList.isEmpty) {
-            return const Text('暂无其他用户');
-          }
-          return SizedBox(
-            width: 300,
-            height: 300,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: controller.userList.length,
-              itemBuilder: (context, index) {
-                final user = controller.userList[index];
-                final isSelected =
-                    controller.currentUser.value?.uid == user.uid;
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 20,
-                    backgroundImage:
-                        user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-                            ? NetworkImage(user.avatarUrl!)
-                            : null,
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: user.avatarUrl == null || user.avatarUrl!.isEmpty
-                        ? Icon(Icons.person,
-                            color: theme.colorScheme.onPrimaryContainer)
-                        : null,
-                  ),
-                  title: Text(user.username),
-                  subtitle: Text('UID: ${user.uid}'),
-                  trailing: isSelected
-                      ? Icon(Icons.check_circle,
-                          color: theme.colorScheme.primary)
-                      : null,
-                  selected: isSelected,
-                  onTap: () {
-                    controller.switchUser(user);
-                    Navigator.of(context).pop();
-                  },
-                );
-              },
-            ),
-          );
-        }),
-      ),
     );
   }
 

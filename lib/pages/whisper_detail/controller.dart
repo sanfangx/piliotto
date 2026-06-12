@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:piliotto/ottohub/api/models/message.dart';
 import 'package:piliotto/repositories/i_message_repository.dart';
+import 'package:piliotto/pages/home/controller.dart';
 
 class WhisperDetailController extends GetxController {
   final IMessageRepository _messageRepo = Get.find<IMessageRepository>();
@@ -42,6 +43,7 @@ class WhisperDetailController extends GetxController {
     scrollController.dispose();
     messageController.dispose();
     focusNode.dispose();
+    _refreshUnreadCount();
     super.onClose();
   }
 
@@ -111,6 +113,7 @@ class WhisperDetailController extends GetxController {
       if (success) {
         messageController.clear();
         await loadMessages(refresh: true);
+        _refreshUnreadCount();
       } else {
         snackbarMessage.value = '消息发送失败，请重试';
       }
@@ -119,5 +122,12 @@ class WhisperDetailController extends GetxController {
     } finally {
       isSending.value = false;
     }
+  }
+
+  /// 刷新首页未读消息数
+  void _refreshUnreadCount() {
+    try {
+      Get.find<HomeController>().refreshUnreadMessageNum();
+    } catch (_) {}
   }
 }

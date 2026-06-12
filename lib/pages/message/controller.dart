@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:piliotto/ottohub/api/models/message.dart';
 import 'package:piliotto/repositories/i_message_repository.dart';
+import 'package:piliotto/pages/home/controller.dart';
 import 'package:piliotto/utils/storage.dart';
 
 class MessageController extends GetxController {
@@ -23,6 +24,16 @@ class MessageController extends GetxController {
     _initCurrentUser();
     _checkInitialFriend();
     loadFriendList();
+    // 打开消息页面时刷新未读消息数
+    _refreshUnreadCount();
+  }
+
+  void _refreshUnreadCount() {
+    try {
+      Get.find<HomeController>().refreshUnreadMessageNum();
+    } catch (_) {
+      // HomeController 可能尚未注册
+    }
   }
 
   void _initCurrentUser() {

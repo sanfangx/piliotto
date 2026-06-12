@@ -142,7 +142,6 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
   // 加载未读消息数
   Future<void> _loadUnreadMessageNum() async {
     if (!userLogin.value) return;
-
     try {
       final num = await _messageRepo.getUnreadMessageNum();
       unreadMessageNum.value = num;
@@ -150,6 +149,9 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
       // 静默处理错误
     }
   }
+
+  /// 公开方法：供外部手动刷新未读消息数
+  Future<void> refreshUnreadMessageNum() => _loadUnreadMessageNum();
 
   // 开始轮询未读消息数
   void _startUnreadMessagePolling() {
