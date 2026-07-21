@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -9,26 +9,26 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 
 class DownloadUtils {
-  // 获取存储权限
+  // 鑾峰彇瀛樺偍鏉冮檺
   static Future<bool> requestStoragePer() async {
     await Permission.storage.request();
     PermissionStatus status = await Permission.storage.status;
     if (status == PermissionStatus.denied ||
         status == PermissionStatus.permanentlyDenied) {
-      await permissionDialog('提示', '存储权限未授权');
+      await permissionDialog('鎻愮ず', '瀛樺偍鏉冮檺鏈巿鏉?);
       return false;
     } else {
       return true;
     }
   }
 
-  // 获取相册权限
+  // 鑾峰彇鐩稿唽鏉冮檺
   static Future<bool> requestPhotoPer() async {
     await Permission.photos.request();
     PermissionStatus status = await Permission.photos.status;
     if (status == PermissionStatus.denied ||
         status == PermissionStatus.permanentlyDenied) {
-      await permissionDialog('提示', '相册权限未授权');
+      await permissionDialog('鎻愮ず', '鐩稿唽鏉冮檺鏈巿鏉?);
       return false;
     } else {
       return true;
@@ -44,6 +44,10 @@ class DownloadUtils {
           if (!await requestStoragePer()) {
             return false;
           }
+
+      if (Platform.isIOS) {
+        await requestPhotoPer();
+      }
         } else {
           if (!await requestPhotoPer()) {
             return false;
@@ -51,7 +55,7 @@ class DownloadUtils {
         }
       }
 
-      SmartDialog.showLoading(msg: '保存中');
+      SmartDialog.showLoading(msg: '淇濆瓨涓?);
       var response = await Dio()
           .get(imgUrl, options: Options(responseType: ResponseType.bytes));
       final String imgSuffix = imgUrl.split('.').last;
@@ -64,10 +68,10 @@ class DownloadUtils {
       );
       SmartDialog.dismiss();
       if (result.isSuccess) {
-        SmartDialog.showToast('「${'$picName.$imgSuffix'}」已保存 ');
+        SmartDialog.showToast('銆?{'$picName.$imgSuffix'}銆嶅凡淇濆瓨 ');
         return true;
       } else {
-        await permissionDialog('保存失败', '相册权限未授权');
+        await permissionDialog('淇濆瓨澶辫触', '鐩稿唽鏉冮檺鏈巿鏉?);
         return false;
       }
     } catch (err) {
@@ -91,7 +95,7 @@ class DownloadUtils {
               onPressed: () async {
                 openAppSettings();
               },
-              child: const Text('去授权'),
+              child: const Text('鍘绘巿鏉?),
             )
           ],
         );
@@ -99,3 +103,4 @@ class DownloadUtils {
     );
   }
 }
+

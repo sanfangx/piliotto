@@ -1,4 +1,4 @@
-name: Flutter Nightly Build CI/CD
+﻿name: Flutter Nightly Build CI/CD
 
 # 触发条件配置
 on:
@@ -147,8 +147,8 @@ jobs:
             os: ubuntu-latest
           - name: windows
             os: windows-latest
-          # - name: ios
-          #   os: macos-latest
+          - name: ios
+            os: macos-latest
           - name: macos
             os: macos-latest
 
